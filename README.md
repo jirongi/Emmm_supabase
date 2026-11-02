@@ -45,7 +45,7 @@ npm start              # http://localhost:3000
 
 ## Edge Function 배포 (CLI 없이)
 
-1. 대시보드 → Edge Functions → Secrets 에 `GEMINI_API_KEY` 추가 (선택: `GEMINI_MODEL`, 기본 `gemini-3.8-flash`)
+1. 대시보드 → Edge Functions → Secrets 에 `GEMINI_API_KEY` 추가 (선택: `GEMINI_MODEL`, 기본 `gemini-3.5-flash-lite`)
 2. Edge Functions → Deploy a new function → Via Editor
 3. 이름 `ai-summary`, `supabase/functions/ai-summary/index.ts` 내용 전체를 붙여 넣고 Deploy
 4. 함수 설정에서 "Verify JWT"가 켜져 있는지 확인 (로그인한 사용자만 호출)

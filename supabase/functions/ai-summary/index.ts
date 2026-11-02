@@ -1,8 +1,8 @@
 // AI 요약 Edge Function
 // 기존 Spring AiService·AiPromptBuilder·GeminiLlmClient를 옮긴 것.
 // 호출: supabase.functions.invoke("ai-summary", { body: { agendaId } })  — host만 가능
-// 필요한 시크릿: GEMINI_API_KEY (선택: GEMINI_MODEL, 기본 gemini-3.8-flash)
-// (gemini-2.5-flash는 새 API 키에서 404가 나서 기본값을 바꿈)
+// 필요한 시크릿: GEMINI_API_KEY (선택: GEMINI_MODEL, 기본 gemini-3.5-flash-lite)
+// (gemini-2.5-flash는 새 API 키에서 404, gemini-3.8-flash는 60초 안에 응답하지 않아 바꿈)
 // SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY는 Supabase가 자동으로 넣어 준다.
 
 import { createClient } from "npm:@supabase/supabase-js@2";
@@ -18,7 +18,8 @@ const MAX_COMMENTS = 30;
 const MAX_COMMENT_CHARS = 400;
 const MAX_FILES = 20;
 const MAX_PDF_CHARS = 12000;
-const GEMINI_TIMEOUT_MS = 60_000;
+// Edge Function 실행 한도(무료 150초) 안에서 넉넉하게
+const GEMINI_TIMEOUT_MS = 120_000;
 
 function json(status: number, body: unknown) {
   return new Response(JSON.stringify(body), {
@@ -254,7 +255,7 @@ ${JSON.stringify(materials)}`;
 async function callGemini(prompt: string): Promise<string> {
   const apiKey = Deno.env.get("GEMINI_API_KEY");
   if (!apiKey) throw new Error("GEMINI_API_KEY 시크릿이 없습니다.");
-  const model = (Deno.env.get("GEMINI_MODEL") ?? "gemini-3.8-flash").replace(/^models\//, "");
+  const model = (Deno.env.get("GEMINI_MODEL") ?? "gemini-3.5-flash-lite").replace(/^models\//, "");
 
   for (let attempt = 0; ; attempt++) {
     const res = await fetch(
