@@ -1,0 +1,89 @@
+.DeleteModal {
+    width: 100%;
+    height: 100%;
+    background-color: #33333399;
+
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    .Modal {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+
+        background-color: white;
+        border-radius: 30px;
+        font-weight: bold;
+
+        width: 460px;
+        height: 299px;
+
+        margin: 34px 53px 35px 53px;
+
+        img {
+            width: 193px;
+            height: 60px;
+        }
+
+        h2 {
+            font-size: 20px;
+            margin-top: 30px;
+            margin-bottom: 11px;
+        }
+
+        .Tip {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            width: 325px;
+            height: 32px;
+
+            font-size: 14px;
+            color: #99999999;
+            font-weight: normal;
+            border-radius: 15px;
+
+            margin-bottom: 24px;
+
+            line-height: 100%;
+            ;
+
+            img {
+                width: 16px;
+                height: 20px;
+                margin-right: 10px;
+            }
+        }
+
+        .Buttons {
+            display: flex;
+            justify-content: center;
+
+            gap: 17px;
+
+            button {
+                border-radius: 10px;
+                border: 1px solid #333333;
+                background-color: white;
+                ;
+
+                width: 168px;
+                height: 50px;
+
+                color: #333333;
+
+            }
+
+            .dltButton {
+                background-color: #FF7373;
+                border: 1px solid #FF7373;
+                color: white;
+            }
+        }
+
+    }
+}

@@ -1,0 +1,122 @@
+.extradiv {
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.MaindivIn {
+  width: 1440px;
+  height: 872px;
+  background-color: #fafafa;
+
+  animation: fadein 0.2s;
+}
+
+.MaindivOut {
+  width: 1440px;
+  height: 872px;
+  background-color: #fafafa;
+
+  animation: fadeout 0.2s;
+}
+
+@keyframes fadein {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeout {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.archiveHeader {
+  width: 1157px;
+  height: 36px;
+  display: grid;
+  grid-template-columns: 768px auto;
+
+  margin: 80px 138px 20px 138px;
+
+  font-size: 20px;
+  font-weight: 900;
+
+  .backIcon {
+    width: 10px;
+    height: 18px;
+  }
+  .backIcon:hover {
+    cursor: pointer;
+  }
+
+  input {
+    width: 379px;
+    height: 36px;
+
+    padding-left: 15px;
+
+    border-radius: 30px;
+    border: #dcdddf;
+  }
+}
+
+.rooms {
+  display: grid;
+  height: 335px;
+  margin-left: 138px;
+  margin-right: 138px;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+  row-gap: 21px;
+  column-gap: 20px;
+
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.room {
+  z-index: 0;
+  position: relative;
+  display: grid;
+  grid-row: auto auto;
+  justify-content: center;
+  align-items: end;
+
+  width: 217px;
+  height: 157px;
+  background-color: #ffffff;
+  border-radius: 20px;
+
+  .roomHostImg {
+    width: 70px;
+    height: auto;
+    margin: 24px 73px 0px 74px;
+  }
+
+  .roomImg {
+    width: 70px;
+    height: auto;
+
+    margin: 40px 73px 0px 74px;
+  }
+
+  .roomName {
+    font-size: 16px;
+    margin-top: 48px;
+    margin-bottom: 18px;
+    text-align: center;
+  }
+}
+
+.room:hover {
+  cursor: pointer;
+}

@@ -1,0 +1,95 @@
+.extradiv {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #fafafa;
+}
+
+.Maindiv {
+  width: 1440px;
+  height: 872px;
+  background-color: none;
+}
+
+.header {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+
+  .logo {
+    margin-left: 20px;
+    margin-top: 28px;
+    width: 144px;
+    height: 45px;
+  }
+  .profile {
+    display: flex;
+    justify-content: right;
+  }
+}
+.profileImg {
+  margin-top: 20px;
+  margin-right: 20px;
+  width: 53px;
+  height: 53px;
+  border-radius: 20px;
+}
+.profileImg:hover {
+  cursor: pointer;
+}
+
+.menu {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin: 61px 375px 0px 375px;
+
+  .new {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background-color: #5043e7;
+    width: 217px;
+    height: 134px;
+
+    border-radius: 20px;
+
+    font-size: 50px;
+
+    .addBtn {
+      width: 24px;
+      height: 24px;
+    }
+  }
+  .new:hover {
+    background-color: #493dd5;
+    cursor: pointer;
+  }
+  .join {
+    margin-left: 20px;
+
+    display: grid;
+    place-items: center;
+    text-align: center;
+
+    width: 453px;
+    height: 76px;
+
+    padding: 30px 0px;
+
+    background-color: #edf2fe;
+
+    border-radius: 0px 30px 30px 30px;
+
+    input {
+      width: 264px;
+      height: 36px;
+      border-radius: 15px;
+      border: none;
+
+      padding-left: 15px;
+    }
+  }
+}

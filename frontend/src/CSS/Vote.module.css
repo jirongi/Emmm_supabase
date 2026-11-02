@@ -1,0 +1,246 @@
+.Maindiv {
+    width: 1045px;
+    height: 726px;
+
+    border-radius: 20px;
+    background-color: rgb(255, 255, 255);
+    overflow: hidden;
+    position: relative;
+
+}
+
+.Maindiv .Novote {
+    height: 540px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.Maindiv .Novote .Novotediv {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+
+
+.Maindiv .Novote .Novotediv img {
+    width: 138.99px;
+    height: 142.26px;
+}
+
+.Maindiv .Novote .Novotediv h3 {
+    margin-top: 30px;
+    font-size: 14px;
+    color: #C5C5C5;
+}
+
+
+
+.Maintitle {
+    display: flex;
+    align-items: center;
+    margin: 40px;
+
+}
+
+.Maintitle h3 {
+    margin: 0 auto 0 0;
+    font-size: 20px;
+}
+
+.Maintitle h2 {
+    margin: 0 0 0 auto;
+    transform: rotate(45deg);
+    font-size: 26px;
+    color: #B4B3B3;
+}
+
+.Maintitle h2:hover {
+    color: #111111;
+}
+
+.Subdiv {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.Subdiv label {
+    display: flex;
+}
+
+.Subdiv form {
+    padding: 20px;
+    background-color: #F8FBFC;
+    border: 1px solid #B4B3B3;
+    border-radius: 20px;
+}
+
+.Subdiv h3 {
+    justify-content: flex-start;
+}
+
+.Subdiv .Subtitle {
+    width: 611px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+
+    margin-top: 59px;
+    margin-bottom: 30px;
+}
+
+.Subdiv .Subtitle h3 {
+    margin: 0 0;
+    font-size: 20px;
+    margin-right: 8px;
+}
+
+.Subdiv .Subtitle img {
+    margin-left: auto;
+    width: 98px;
+    height: 40px;
+}
+
+.Subdiv .Votelist {
+    width: 900px;
+    height: 366px;
+    overflow: scroll;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.Subdiv .Votelist .Vote {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    width: 611px;
+    height: 70px;
+
+    border-radius: 20px;
+    border: 1px solid #EDEDED;
+    background-color: #F5F5F5;
+    margin-bottom: 20px;
+}
+
+.Subdiv .Votelist .Vote .option {
+    text-align: center;
+    margin-left: auto;
+    margin-right: 25px;
+    width: 19px;
+    height: 22px;
+    float: right;
+}
+
+.Subdiv .Votelist .Vote .VoteText {
+    gap: 10px;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+
+    padding-left: 34px;
+    padding-right: 20px;
+
+    width: 611px;
+    height: 42px;
+}
+
+.Subdiv .Votelist .Vote .VoteText input {
+    background-color: #ededed;
+    font-size: 18px;
+    color: #5a5a5a;
+    margin: 0;
+    border: none;
+    width: 400px;
+    height: auto;
+}
+
+.Subdiv .Votelist .Vote .VoteText h1 {
+    font-size: 16px;
+    margin: 0;
+}
+
+.Subdiv .Votelist .Vote .VoteText span {
+
+    font-size: 12px;
+    color: #b4b3b3;
+}
+
+.Subdiv .Votelist .Vote img {
+    height: 12px;
+    width: auto;
+    margin-left: auto;
+    margin-right: 20px;
+}
+
+.Subdiv .Votelist .Vote .Modal {
+    border-radius: 15px;
+    border: 1px solid #EDEDED;
+    background-color: white;
+    border: 1px #ededed;
+    font-weight: normal;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    position: absolute;
+    z-index: 999;
+
+    right: -10%;
+    top: 37%;
+
+    width: 109px;
+    height: 62px;
+
+    color: #b4b3b3;
+}
+
+
+
+.Subdiv .Votelist .Vote .Modal .Options {
+    margin: 10px 10px;
+    width: 83px;
+    height: 42px;
+}
+
+.Subdiv .Votelist .Vote .Modal .Options .Edit {
+    margin-bottom: 10px;
+}
+
+.Subdiv .Votelist .Vote .Modal .Options .Edit img {
+    margin-right: 4px;
+
+    width: 14px;
+    height: 14px;
+}
+
+
+.Subdiv .Votelist .Vote .Modal .Options .Edit:hover {
+    color: #111111;
+}
+
+.Subdiv .Votelist .Vote .Modal .Options .Dlt img {
+    margin-right: 10px;
+
+    width: auto;
+    height: 14px;
+}
+
+.Subdiv .Votelist .Vote .Modal .Options .Dlt:hover {
+    color: #111111;
+}
+
+
+
+
+.Subdiv .Votelist .Vote:hover {
+    border: 1px solid #5043E7;
+}

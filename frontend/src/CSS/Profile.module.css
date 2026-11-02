@@ -1,0 +1,86 @@
+.extradiv {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.maindiv {
+  width: 1440px;
+  height: 872px;
+
+  position: relative;
+}
+
+.profilePopup {
+  z-index: 5;
+  position: absolute;
+  top: 77px;
+  right: 47px;
+  display: grid;
+  justify-content: center;
+
+  width: fit-content;
+  height: 123px;
+  border-radius: 15px;
+
+  padding-left: 20px;
+  padding-right: 20px;
+
+  background-color: #ffffff;
+  border: 1px solid #ededed;
+
+  .info {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    margin-top: 12px;
+
+    .profileImg {
+      margin-right: 10px;
+      width: 43px;
+      height: 43px;
+      border-radius: 100px;
+    }
+    .text {
+      margin: 0;
+
+      .name {
+        font-size: 14px;
+        color: black;
+      }
+      .email {
+        font-size: 10px;
+        color: #908f8f;
+      }
+    }
+  }
+
+  .logout {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    width: 179px;
+    height: 36px;
+    background-color: #ff7373;
+    border-radius: 10px;
+
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 700;
+
+    .logoutIcon {
+      width: 12px;
+      height: 12px;
+      margin-right: 4px;
+    }
+  }
+}
+
+.logout:hover {
+  background-color: #e76767;
+  cursor: pointer;
+}

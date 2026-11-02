@@ -1,0 +1,55 @@
+@import url("https://fonts.googleapis.com/css2?family=Nanum+Gothic&display=swap");
+
+html,
+body {
+  font-family: "Nanum Gothic";
+  background-color: black;
+  margin: 0;
+
+  background-color: #f8f8f8;
+  width: 100%;
+  height: 100%;
+
+  button {
+    box-shadow: none;
+    border: none;
+  }
+
+  input {
+    outline: none;
+  }
+
+  ::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* 기본 스크롤 이상한회색 부분 빼기 */
+body::-webkit-scrollbar {
+    display: none;
+}
+
+.extradiv {
+  position: relative;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.Maindiv {
+  width: 1440px;
+  height: 872px;
+}
+
+.Component {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  gap: 20px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

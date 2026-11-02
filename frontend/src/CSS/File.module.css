@@ -1,0 +1,194 @@
+.Maindiv {
+    width: 1045px;
+    height: 726px;
+    border-radius: 20px;
+    background-color: rgb(255, 255, 255);
+    overflow: hidden;
+    position: relative;
+
+    .Nofile {
+        height: 540px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        .Nofilediv {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+
+            img {
+                width: 117.26px;
+                height: 146.58px;
+            }
+
+            h3 {
+                margin-top: 30px;
+                font-size: 14px;
+                color: #C5C5C5;
+            }
+        }
+    }
+
+    .Iconbox {
+        position: absolute;
+        left: 88.8%;
+        top: 14.5%;
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        width: 33px;
+        height: 30px;
+
+        margin: 10px 0 0 66px;
+        border-radius: 10px;
+        background-color: #E4E4E4;
+
+        .ListIcon {
+            width: 21.43px;
+            height: 22px;
+        }
+    }
+
+    .Filelist {
+        overflow: scroll;
+        position: absolute;
+        left: 88.8%;
+        top: 14.5%;
+
+        width: 115px;
+        height: 620px;
+        overflow-y: auto;
+        overflow-x: hidden;
+
+        background-color: #F5F5F5;
+        border: 1px solid #EDEDED;
+
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        gap: 10px;
+
+
+        .Createbox {
+
+            margin-top: 50px;
+            width: 99px;
+            height: 90px;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            color: #B4B3B3;
+            font-size: 20px;
+            background-color: white;
+
+            border: 1px solid #F5F5F5;
+        }
+
+        .Createbox:hover {
+            border: 1px solid #555555;
+        }
+
+        .box {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            width: 99px;
+            height: 90px;
+            background-color: white;
+            border: 1px solid #F5F5F5;
+
+            img {
+                width: 60px;
+                height: auto;
+            }
+
+            .Close {
+                position: absolute;
+                top: 5%;
+                right: 5%;
+
+                width: 10px;
+                height: 10px;
+                border-radius: 30%;
+
+                display: flex;
+                justify-content: center;
+                align-items: center;
+
+                h1 {
+                    font-size: 20px;
+                    color: rgb(0, 0, 0);
+                    transform: rotate(45deg);
+                }
+            }
+        }
+
+        .box:hover {
+            border: 1px solid #555555;
+        }
+    }
+}
+
+.Maintitle {
+    display: flex;
+    align-items: center;
+    margin: 40px;
+
+    h3 {
+        margin: 0 auto 0 0;
+        font-size: 20px;
+    }
+
+    h2 {
+        margin: 0 0 0 auto;
+        transform: rotate(45deg);
+        font-size: 26px;
+        color: #B4B3B3;
+    }
+
+    h2:hover {
+        color: #111111;
+    }
+}
+
+.Subdiv {
+    height: 68px;
+}
+
+.Viewer {
+    position: relative;
+    width: 100%;
+    height: 620px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    img {
+        width: 50%;
+        height: auto;
+    }
+
+    iframe {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background-color: #ffffff;
+        border: none;
+    }
+
+
+}
+
+.resultBlock {
+    display: flex;
+}
