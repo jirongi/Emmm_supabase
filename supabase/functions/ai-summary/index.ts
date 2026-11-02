@@ -1,7 +1,8 @@
 // AI 요약 Edge Function
 // 기존 Spring AiService·AiPromptBuilder·GeminiLlmClient를 옮긴 것.
 // 호출: supabase.functions.invoke("ai-summary", { body: { agendaId } })  — host만 가능
-// 필요한 시크릿: GEMINI_API_KEY (선택: GEMINI_MODEL, 기본 gemini-2.5-flash)
+// 필요한 시크릿: GEMINI_API_KEY (선택: GEMINI_MODEL, 기본 gemini-3.8-flash)
+// (gemini-2.5-flash는 새 API 키에서 404가 나서 기본값을 바꿈)
 // SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY는 Supabase가 자동으로 넣어 준다.
 
 import { createClient } from "npm:@supabase/supabase-js@2";
@@ -253,7 +254,7 @@ ${JSON.stringify(materials)}`;
 async function callGemini(prompt: string): Promise<string> {
   const apiKey = Deno.env.get("GEMINI_API_KEY");
   if (!apiKey) throw new Error("GEMINI_API_KEY 시크릿이 없습니다.");
-  const model = (Deno.env.get("GEMINI_MODEL") ?? "gemini-2.5-flash").replace(/^models\//, "");
+  const model = (Deno.env.get("GEMINI_MODEL") ?? "gemini-3.8-flash").replace(/^models\//, "");
 
   for (let attempt = 0; ; attempt++) {
     const res = await fetch(
