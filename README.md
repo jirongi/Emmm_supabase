@@ -43,6 +43,15 @@ npm start              # http://localhost:3000
 
 이미 실행한 파일은 고치지 않습니다. 바꿀 내용이 생기면 새 마이그레이션 파일을 추가합니다.
 
+## Edge Function 배포 (CLI 없이)
+
+1. 대시보드 → Edge Functions → Secrets 에 `GEMINI_API_KEY` 추가 (선택: `GEMINI_MODEL`, 기본 `gemini-2.5-flash`)
+2. Edge Functions → Deploy a new function → Via Editor
+3. 이름 `ai-summary`, `supabase/functions/ai-summary/index.ts` 내용 전체를 붙여 넣고 Deploy
+4. 함수 설정에서 "Verify JWT"가 켜져 있는지 확인 (로그인한 사용자만 호출)
+
+CLI가 있으면 `npx supabase functions deploy ai-summary --project-ref ktnsntefvnptssqbknlf`로도 올릴 수 있습니다.
+
 ## 진행 상황
 
 | 단계 | 내용 | 상태 |
@@ -55,7 +64,7 @@ npm start              # http://localhost:3000
 | 5 | 실시간 · Storage (`20261102000004_realtime_storage.sql`) | 완료 (적용됨) |
 | 6 | 로그인 연결 확인 | 테스트 계정 로그인 확인, Google 로그인은 직접 확인 필요 |
 | 7 | 프론트 교체 + 타이머 보조 SQL (`20261102000005_timer_started_at.sql`) | 완료 (두 계정 브라우저 시험 18단계 통과) |
-| 8 | AI 요약 Edge Function | 대기 |
+| 8 | AI 요약 Edge Function (`supabase/functions/ai-summary`) | 코드 작성, 배포·시험 대기 |
 | 9 | 정리 | 대기 |
 
 ## 비밀 값 규칙
