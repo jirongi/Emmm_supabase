@@ -38,7 +38,7 @@ Domuksa_Supabase/
 | 2 | DB 스키마 (`20261102000001_schema.sql`) | 완료 (적용됨) |
 | 3 | 권한(RLS) (`20261102000002_rls.sql`) | 완료 (적용됨) |
 | 4 | RPC 함수 (`20261102000003_rpc.sql`) + 테스트 (`tests/rls_smoke_test.sql`) | 완료 (적용됨, 테스트 35/35 통과) |
-| 5 | 실시간 · Storage (`20261102000004_realtime_storage.sql`) | SQL 작성, 적용 대기 |
+| 5 | 실시간 · Storage (`20261102000004_realtime_storage.sql`) | 완료 (적용됨) |
 | 6 | 로그인 연결 확인 | 대기 |
 | 7 | 프론트 교체 | 대기 |
 | 8 | AI 요약 Edge Function | 대기 |
