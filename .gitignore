@@ -1,0 +1,14 @@
+# 비밀 값
+.env
+.env.*
+!.env.example
+
+# Supabase CLI 로컬 상태
+supabase/.branches
+supabase/.temp
+
+# 기타
+node_modules/
+.DS_Store
+.vscode/
+.idea/
