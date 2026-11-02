@@ -1,7 +1,7 @@
 //투표 개수/투표 이름
 
 import { useRef, useEffect, useState } from "react";
-import axios from "axios";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import style from "../CSS/Vote.module.css";
 
 import VoteNew from "./VoteNew";
@@ -12,22 +12,17 @@ import bin from "../asset/icon-trashbin.png";
 import addBtn from "../asset/icon-addBtn.png";
 import voteCenterHoverbefore from "../asset/icon-emptyVoteHoverbefore.png";
 import voteCenterHoverafter from "../asset/icon-emptyVoteHoverafter.png";
+import { deleteVote, getVotes, updateVote } from "../api/votes";
+import { errorMessage } from "../api/errors";
 
-function Vote({ token, isHost, onChange, clickedAgendaId, socketVote, socketVoteOption, socketVoteResult, setSocketVoteId, clickedAgendaName }) {
+function Vote({ isHost, userId, onChange, agendaId, clickedAgendaName }) {
+    const queryClient = useQueryClient();
 
     //[아이콘 호버]
     const [iconVote, setIconVote] = useState(false);
 
-    //[투표리스트]
-    const [votes, setVotes] = useState([]);
-    //[투표 존제 여부]
-    const [voteEmpty, setVoteEmpty] = useState(true);
-
     //[투표이름변경]
     const [Changed, setChanged] = useState(null);
-
-    //[새로운 투표 (객체)]
-    const [Voteobj, setVoteobj] = useState([]);
 
     //[모달]
     const [ModalId, setModalId] = useState(null);
@@ -36,10 +31,8 @@ function Vote({ token, isHost, onChange, clickedAgendaId, socketVote, socketVote
 
     //[새로만들기 모달]
     const [Newvote, setNewvote] = useState(false);
-    //투표 상세페이지
-    const [Detail, setDetail] = useState(false);
-    const [DetailId, setDetailId] = useState(null);
-    const [DetailName, setDetailName] = useState(null);
+    //투표 상세페이지 { id, title }
+    const [detail, setDetail] = useState(null);
 
     //[모달외부인식]
     useEffect(() => {
@@ -58,89 +51,39 @@ function Vote({ token, isHost, onChange, clickedAgendaId, socketVote, socketVote
         }
     }, [ModalId, inputRef]);
 
-    //[투표list]
-    useEffect(() => {
-        if (clickedAgendaId === null || token === null) return;
-        axios
-            .get(`${process.env.REACT_APP_HOST_URL}/vote/${clickedAgendaId}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            })
-            .then((res) => {
-                if (res.status === 200 || res.status === 201) {
-                    setVotes(res.data);
-                    if (res.data.length === 0) {
-                        setVoteEmpty(true);
-                    } else {
-                        setVoteEmpty(false);
-                    }
-                }
-            })
-            .catch((error) => {
-                console.error("마이페이지 정보 가져오기 실패:", error);
-            });
-    }, [socketVote,token,clickedAgendaId]);
-    function addVote() {
-        axios
-            .post(`${process.env.REACT_APP_HOST_URL}/vote/${clickedAgendaId}`,
-                {
-                    title: "찬반투표",
-                },
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                })
-            .then((res) => {
-                setVoteobj(res.data);
-            })
-            .catch((error) => {
-                console.error("마이페이지 정보 가져오기 실패:", error);
-            });
-    }
+    const { data: votes = [] } = useQuery({
+        queryKey: ["votes", agendaId],
+        queryFn: () => getVotes(agendaId),
+    });
+    const refresh = () => queryClient.invalidateQueries({ queryKey: ["votes", agendaId] });
 
     function handleOption(e, id) {
         setModalId(id);
         e.stopPropagation();
     }
-    function deleteVote(voteId) {
-        axios
-            .delete(
-                `${process.env.REACT_APP_HOST_URL}/vote/${voteId}`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                })
-            .catch((error) => {
-                console.error("실패:", error);
-            });
-    }
 
-    function EditVote(e, id) {
-        if (e.key === "Enter") {
-            axios
-                .patch(`${process.env.REACT_APP_HOST_URL}/vote/${id}`, {
-                    title: e.target.value,
-                }, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                })
-                .catch((error) => {
-                    console.error("실패:", error);
-                });
-            setChanged(null);
+    async function handleDelete(voteId) {
+        try {
+            await deleteVote(voteId);
+            refresh();
+        } catch (error) {
+            alert(errorMessage(error));
         }
-
     }
 
-    function openDetail(id) {
-        setSocketVoteId(id);
-        setDetailId(id);
-        setDetail(true);
+    async function EditVote(e, id) {
+        if (e.key !== "Enter") return;
+        const title = e.target.value.trim();
+        setChanged(null);
+        if (!title) return;
+        try {
+            await updateVote(id, { title });
+            refresh();
+        } catch (error) {
+            alert(errorMessage(error));
+        }
     }
+
     return (
         <div className={style.Maindiv}>
             <div className={style.Maintitle}>
@@ -148,22 +91,17 @@ function Vote({ token, isHost, onChange, clickedAgendaId, socketVote, socketVote
                 <h2 onClick={() => onChange("basic")} >+</h2>
             </div>
 
-            {voteEmpty ?
+            {votes.length === 0 ?
                 <>
                     <div className={style.Novote}>
-                        <label htmlFor="Newfile">
-                            <div
-                                className={style.Novotediv}
-                                onMouseEnter={() => setIconVote(true)}
-                                onMouseLeave={() => setIconVote(false)}
-                                onClick={() => {
-                                    isHost && setNewvote(true);
-                                    isHost && addVote();
-                                }}>
-                                <img alt="Voteicon" src={iconVote ? voteCenterHoverafter : voteCenterHoverbefore} />
-                                <h3>투표를 추가해 주세요</h3>
-                            </div>
-                        </label>
+                        <div
+                            className={style.Novotediv}
+                            onMouseEnter={() => setIconVote(true)}
+                            onMouseLeave={() => setIconVote(false)}
+                            onClick={() => isHost && setNewvote(true)}>
+                            <img alt="Voteicon" src={iconVote ? voteCenterHoverafter : voteCenterHoverbefore} />
+                            <h3>{isHost ? "투표를 추가해 주세요" : "아직 투표가 없어요"}</h3>
+                        </div>
                     </div>
                 </>
                 :
@@ -171,40 +109,34 @@ function Vote({ token, isHost, onChange, clickedAgendaId, socketVote, socketVote
                     <div className={style.Subdiv}>
                         <div className={style.Subtitle}>
                             <h3>{clickedAgendaName}</h3>
-                            {isHost && <img
-                                alt="addBtn"
-                                src={addBtn}
-                                onClick={() => {
-                                    setNewvote(true);
-                                    addVote();
-                                }} />}
+                            {isHost && <img alt="addBtn" src={addBtn} onClick={() => setNewvote(true)} />}
                         </div>
                         <div className={style.Votelist}>
                             {votes.map((vote) => (
-                                <div className={style.Vote} id={vote.voteId} key={vote.voteId} onClick={(e) => { setDetailName(vote.title); openDetail(vote.voteId); }}>
-                                    <div className={style.VoteText} onDoubleClick={() => setChanged(vote.voteId)}>
-                                        {Changed === vote.voteId ? <input id="newVoteName" ref={inputRef} onKeyDown={(e) => EditVote(e, vote.voteId)} placeholder={vote.title} /> : <h1>{vote.title}</h1>}
-                                        <span>{vote.number}</span>
+                                <div className={style.Vote} key={vote.id} onClick={() => setDetail({ id: vote.id, title: vote.title })}>
+                                    <div className={style.VoteText} onDoubleClick={() => isHost && setChanged(vote.id)}>
+                                        {Changed === vote.id
+                                            ? <input ref={inputRef} onClick={(e) => e.stopPropagation()} onKeyDown={(e) => EditVote(e, vote.id)} placeholder={vote.title} />
+                                            : <h1>{vote.title}</h1>}
+                                        <span>{vote.status === "complete" ? "마감" : ""}</span>
                                     </div>
                                     {isHost && <h3
                                         className={style.option}
                                         alt="option"
-                                        onClick={(e) => handleOption(e, vote.voteId)}>⋮</h3>}
-                                    {ModalId === vote.voteId &&
-                                        <div key={vote.voteId} className={style.Modal} ref={ModalRef}>
+                                        onClick={(e) => handleOption(e, vote.id)}>⋮</h3>}
+                                    {ModalId === vote.id &&
+                                        <div className={style.Modal} ref={ModalRef}>
                                             <div className={style.Options}>
                                                 <div className={style.Edit} onClick={(e) => {
-
-                                                    setChanged(vote.voteId);
+                                                    setChanged(vote.id);
                                                     setModalId(null);
                                                     e.stopPropagation();
                                                 }}>
                                                     <img alt="edit" src={edit} />
                                                     이름 변경
                                                 </div>
-                                                <div className={style.Dlt} id={vote.voteId} onClick={(e) => {
-
-                                                    deleteVote(vote.voteId);
+                                                <div className={style.Dlt} onClick={(e) => {
+                                                    handleDelete(vote.id);
                                                     setModalId(null);
                                                     e.stopPropagation();
                                                 }}>
@@ -220,26 +152,20 @@ function Vote({ token, isHost, onChange, clickedAgendaId, socketVote, socketVote
                     </div>
                 </>}
 
-            {
-                Newvote === true && isHost &&
+            {Newvote && isHost &&
                 <VoteNew
-                    token={token}
-                    setNewvote={setNewvote}
-                    Voteobj={Voteobj}
+                    agendaId={agendaId}
+                    onClose={() => setNewvote(false)}
+                    onCreated={refresh}
                 />
             }
-            {
-                Detail === true &&
+            {detail &&
                 <VoteDetail
-                    //웹소켓 욥션
-                    socketVoteOption={socketVoteOption}
-                    socketVoteResult={socketVoteResult}
-                    token={token}
                     isHost={isHost}
-                    Newvote={Newvote}
-                    DetailName={DetailName}
-                    DetailId={DetailId}
-                    setDetail={setDetail}
+                    userId={userId}
+                    voteId={detail.id}
+                    DetailName={detail.title}
+                    onClose={() => setDetail(null)}
                 />
             }
         </div >

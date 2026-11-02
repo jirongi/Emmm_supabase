@@ -1,5 +1,5 @@
-import { useRef, useState, useEffect } from "react";
-import axios from "axios";
+import { useEffect, useRef } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import style from "../CSS/Timer.module.css";
 import TimerWord from "../asset/icon-timer.png";
@@ -7,204 +7,54 @@ import TimerPlay from "../asset/icon-timer-play.png";
 import TimerReset from "../asset/icon-timer-reset.png";
 import TimerUpdown from "../asset/icon-timer-updown.png";
 import TimerStop from "../asset/icon-timer-stop.png";
+import { getTimer, remainingSeconds, updateTimer } from "../api/timer";
+import { errorMessage } from "../api/errors";
+import { useNow } from "../hooks/useNow";
 
-function Timer({ isHost, socketTimer, roomId, token }) {
+function Timer({ isHost, roomId }) {
+    const queryClient = useQueryClient();
+    const { data: timer } = useQuery({
+        queryKey: ["timer", roomId],
+        queryFn: () => getTimer(roomId),
+    });
+    const now = useNow(500);
 
-
-    const [State, setState] = useState("stop");
-    const [total, setTotal] = useState(0);
+    const State = timer?.status ?? "stop";
+    const total = remainingSeconds(timer, now);
     const hour = Math.floor(total / 3600);
     const min = Math.floor((total % 3600) / 60);
     const sec = total % 60;
-    const Time = useRef(null);
 
+    async function save(fields) {
+        try {
+            await updateTimer(roomId, fields);
+            queryClient.invalidateQueries({ queryKey: ["timer", roomId] });
+        } catch (error) {
+            alert(errorMessage(error));
+        }
+    }
+
+    // 0초가 되면 host 화면 한 곳만 정지 요청을 보낸다 (기존: 모든 사람이 각자 보냄)
+    const stopping = useRef(false);
     useEffect(() => {
-        if (token === null || roomId === null || isHost === null) return;
-        axios
-            .get(
-                `${process.env.REACT_APP_HOST_URL}/timer/${roomId}`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            )
-            .then((res) => {
-                setTotal(res.data.time); //시간 받고
-                setState(res.data.state); //상태값 받기
-
-                if (res.data.state !== "stop") {
-                    Time.current = setInterval(() => { //1초식 줄어들기
-                        setTotal(pre => {
-                            if (pre === 1 || pre === 0) { //0초되면 멈추기
-                                axios
-                                    .patch(
-                                        `${process.env.REACT_APP_HOST_URL}/timer/${roomId}/status`,
-                                        {
-                                            state: "stop",
-                                        },
-                                        {
-                                            headers: {
-                                                Authorization: `Bearer ${token}`,
-                                            },
-                                        }
-                                    )
-                                    .then((res) => {
-                                    })
-                                    .catch((error) => {
-                                        console.error("마이페이지 정보 가져오기 실패:", error);
-                                    });
-                                clearInterval(Time.current);
-                                return 0;
-                            }
-                            return pre - 1
-                        });
-                    }, 1000);
-                }
-            })
-            .catch((error) => {
-                console.error("마이페이지 정보 가져오기 실패:", error);
-            });
-
-        return () => {
-            if (Time.current) {
-                clearInterval(Time.current);
-                Time.current = null;
-            }
-        };
-
-    }, [socketTimer, roomId, token,isHost])
-
-    //불러와서 작동하기
+        if (!isHost || State !== "play" || total > 0) {
+            stopping.current = false;
+            return;
+        }
+        if (stopping.current) return;
+        stopping.current = true;
+        save({ status: "stop", remainingSec: 0 });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isHost, State, total]);
 
     function ChangeState() {
         if (total === 0) return;
-        if (State === "stop") {
-            axios
-                .patch(
-                    `${process.env.REACT_APP_HOST_URL}/timer/${roomId}/status`,
-                    {
-                        state: "play",
-                    },
-                    {
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                        },
-                    }
-                )
-                .then((res) => {
-                })
-                .catch((error) => {
-                    console.error("마이페이지 정보 가져오기 실패:", error);
-                });
-        } else {
-            axios
-                .patch(
-                    `${process.env.REACT_APP_HOST_URL}/timer/${roomId}/status`,
-                    {
-                        state: "stop",
-                    },
-                    {
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                        },
-                    }
-                )
-                .then((res) => {
-                })
-                .catch((error) => {
-                    console.error("마이페이지 정보 가져오기 실패:", error);
-                });
-        }
-
-
+        if (State === "stop") save({ status: "play" });
+        else save({ status: "stop", remainingSec: total });
     }
 
-    function EditTime(e) {
-        const time = total + parseInt(e.currentTarget.id) * 60;
-
-        axios
-            .patch(
-                `${process.env.REACT_APP_HOST_URL}/timer/${roomId}/time`,
-                {
-                    time: time,
-                },
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            )
-            .then((res) => {
-            })
-            .catch((error) => {
-                console.error("마이페이지 정보 가져오기 실패:", error);
-            });
-    }
-
-    function Reset() {
-        axios
-            .patch(
-                `${process.env.REACT_APP_HOST_URL}/timer/${roomId}/time`,
-                {
-                    time: 0,
-                },
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            )
-            .then((res) => {
-            })
-            .catch((error) => {
-                console.error("마이페이지 정보 가져오기 실패:", error);
-            });
-    }
-
-    function UponeMinutes() {
-        const time = total + 60;
-        axios
-            .patch(
-                `${process.env.REACT_APP_HOST_URL}/timer/${roomId}/time`,
-                {
-                    time: time,
-                },
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            )
-            .then((res) => {
-            })
-            .catch((error) => {
-                console.error("마이페이지 정보 가져오기 실패:", error);
-            });
-    }
-    function DownoneMinutes() {
-        if(total<1||total<0){
-            return;
-        }
-        const time = total - 60;
-        axios
-            .patch(
-                `${process.env.REACT_APP_HOST_URL}/timer/${roomId}/time`,
-                {
-                    time: time,
-                },
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                }
-            )
-            .then((res) => {
-            })
-            .catch((error) => {
-                console.error("마이페이지 정보 가져오기 실패:", error);
-            });
-    }
+    const addSeconds = (seconds) => save({ remainingSec: Math.max(0, total + seconds) });
+    const time = `${hour.toString().padStart(2, "0")}:${min.toString().padStart(2, "0")}:${sec.toString().padStart(2, "0")}`;
 
     return (
         (isHost ?
@@ -212,20 +62,20 @@ function Timer({ isHost, socketTimer, roomId, token }) {
                 <img className={style.TimerWord} alt="TimerWord" src={TimerWord} />
                 <div className={style.margin}>
                     <div className={style.TImerBody}>
-                        <h1>{hour.toString().padStart(2, "0")}:{min.toString().padStart(2, "0")}:{sec.toString().padStart(2, "0")}</h1>
+                        <h1>{time}</h1>
                         <div className={style.UPandDOWN}>
-                            <img alt="keyup" onClick={() => UponeMinutes()} src={TimerUpdown} />
-                            <img alt="keydown" onClick={() => DownoneMinutes()} src={TimerUpdown} className={style.imgDown} />
+                            <img alt="keyup" onClick={() => addSeconds(60)} src={TimerUpdown} />
+                            <img alt="keydown" onClick={() => total > 0 && addSeconds(-60)} src={TimerUpdown} className={style.imgDown} />
                         </div>
                     </div>
                     <div className={style.Buttons}>
-                        <button className={style.Play} onClick={() => ChangeState()}><img alt="stateBtn" id="stateBtn" src={State === "stop" ? TimerPlay : TimerStop} /></button>
-                        <button className={style.Reset} onClick={() => Reset()}><img alt="reset" src={TimerReset} /></button>
+                        <button className={style.Play} onClick={() => ChangeState()}><img alt="stateBtn" src={State === "stop" ? TimerPlay : TimerStop} /></button>
+                        <button className={style.Reset} onClick={() => save({ status: "stop", remainingSec: 0 })}><img alt="reset" src={TimerReset} /></button>
                     </div>
                     <div className={style.ExtraButtons}>
-                        <button id="3" onClick={(e) => EditTime(e)}>+ 3m</button>
-                        <button id="5" onClick={(e) => EditTime(e)}>+ 5m</button>
-                        <button id="10" onClick={(e) => EditTime(e)}>+ 10m</button>
+                        <button onClick={() => addSeconds(3 * 60)}>+ 3m</button>
+                        <button onClick={() => addSeconds(5 * 60)}>+ 5m</button>
+                        <button onClick={() => addSeconds(10 * 60)}>+ 10m</button>
                     </div>
                 </div>
             </div>
@@ -234,11 +84,11 @@ function Timer({ isHost, socketTimer, roomId, token }) {
                 <img className={style.TimerWord} alt="TimerWord" src={TimerWord} />
                 <div className={style.margin}>
                     <div className={style.TImerBody}>
-                        <h1>{hour.toString().padStart(2, "0")}:{min.toString().padStart(2, "0")}:{sec.toString().padStart(2, "0")}</h1>
+                        <h1>{time}</h1>
                     </div>
                 </div>
             </div>
         )
     );
 }
-export default Timer;  
+export default Timer;

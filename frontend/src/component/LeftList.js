@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import axios from "axios";
+import { useQueryClient } from "@tanstack/react-query";
 import style from "../CSS/Left.module.css";
 
 import Timer from "./Timer";
@@ -10,14 +10,12 @@ import edit from "../asset/icon-edit.png";
 import bin from "../asset/icon-trashbin.png";
 import visible from "../asset/icon-visible.png";
 import add from "../asset/icon-add.png";
+import { renameRoom, setCurrentAgenda, setRoomPassword } from "../api/rooms";
+import { addAgenda, deleteAgenda, updateAgenda } from "../api/agendas";
+import { errorMessage } from "../api/errors";
 
-function LeftList({ token, isHost, roomId, roomName, deleteModal, socketAgendas, socketTimer,
-  setClickedAgendaId, clickedAgendaId, setRoomName, setclickedAgendaName, setActionAgendaChange,setConfigReset
-}) {
-
-  //[안건]
-  const [blockId, setBlockId] = useState(clickedAgendaId);
-  const [agendas, setAgendas] = useState([]);
+function LeftList({ isHost, roomId, roomName, agendas, clickedAgendaId, onSelectAgenda, deleteModal }) {
+  const queryClient = useQueryClient();
 
   //[안건이름변경]
   const [Changed, setChanged] = useState(null);
@@ -27,6 +25,9 @@ function LeftList({ token, isHost, roomId, roomName, deleteModal, socketAgendas,
 
   //[방설정]
   const [Setting, setSetting] = useState(false);
+  const [newRoomName, setNewRoomName] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   //[모달]
   const [ModalId, setModalId] = useState(null);
@@ -51,227 +52,67 @@ function LeftList({ token, isHost, roomId, roomName, deleteModal, socketAgendas,
     }
   }, [ModalId, inputRef]);
 
-  //리스브 불러오는거
-  useEffect(() => {
-    if (!roomId || !token) return;
-    axios
-      .get(
-        `${process.env.REACT_APP_HOST_URL}/room/${roomId}/agenda`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-      .then((res) => {
-        const format = res.data.map(item => ({
-          sequence: item.agenda.sequence,
-          id: item.agenda.agendaId,
-          name: item.agenda.name,
-        }));
-        setAgendas(format);
-      })
-      .catch((error) => {
-        console.error("마이페이지 정보 가져오기 실패:", error);
-      });
+  const refreshAgendas = () => queryClient.invalidateQueries({ queryKey: ["agendas", roomId] });
 
-  }, [roomId, socketAgendas,token]);
-
-  useEffect(() => {
-    //아직 첫 안건 번호가 없다면, 실행하지 않는다, 첫안건 번호 세팅후 실행
-    if (clickedAgendaId === null) {
-      return;
+  async function run(task) {
+    try {
+      await task();
+    } catch (error) {
+      alert(errorMessage(error));
     }
-    setBlockId(clickedAgendaId)
-  }, [clickedAgendaId]);
-
-  function handleSetting() {
-    if (Setting === true) {
-      setSetting(false);
-    } else {
-      setSetting(true);
-    }
-  }
-  function handleBlock(e) {
-
-    setActionAgendaChange(parseInt(e.currentTarget.id));
-    setBlockId(parseInt(e.currentTarget.id));
-    setClickedAgendaId(parseInt(e.currentTarget.id));
-    setclickedAgendaName((agendas.find(item => item.id === parseInt(e.currentTarget.id))).name);
   }
 
   function handleOption(e, id) {
     setModalId(id);
     e.stopPropagation();
   }
-  function handleVisible() {
-    const pw = document.getElementById("password");
-    if (pw.type === "password") {
-      pw.type = "text";
-      return;
-    }
-    pw.type = "password";
-  }
 
   //방 functions
-  function handleEditRoom(e) {
-    const newRoomName = e.target.querySelector("#newRoomName").value;
-    const newPassword = e.target.querySelector("#newPassword").value;
-    axios
-      .patch(`${process.env.REACT_APP_HOST_URL}/room/${roomId}`,
-        {
-          name: newRoomName,
-          password: newPassword,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-      .then((res) => {
-        if (res.status === 200) {
-          setRoomName(newRoomName);
-          setSetting(false);
+  function handleEditRoom() {
+    run(async () => {
+      // 빈 칸은 바꾸지 않는다 (기존: 빈 값으로 덮어써지던 문제)
+      if (newRoomName.trim()) await renameRoom(roomId, newRoomName.trim());
+      if (newPassword) {
+        if (!/^\d{4}$/.test(newPassword)) {
+          alert("비밀번호는 숫자 4자리로 입력해 주세요.");
+          return;
         }
-      })
-      .catch((error) => {
-        console.error("마이페이지 정보 가져오기 실패:", error);
-      });
+        await setRoomPassword(roomId, newPassword);
+      }
+      queryClient.invalidateQueries({ queryKey: ["room", roomId] });
+      setNewRoomName("");
+      setNewPassword("");
+      setSetting(false);
+    });
   }
 
   //안건 functions
-  function addAgenda() {
-    const roomId = localStorage.getItem("roomId");
-
-    axios
-      .post(`${process.env.REACT_APP_HOST_URL}/agenda/${roomId}`,
-        {
-          name: "안건 제목",
-          sequence: 1
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-      .then((res) => {
-        if (res.status === 200) {
-          axios
-            .get(
-              `${process.env.REACT_APP_HOST_URL}/room/${roomId}/agenda`,
-              {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                },
-              })
-            .then((res) => {
-              const format = res.data.map(item => ({
-                id: item.agenda.agendaId,
-                name: item.agenda.name,
-              }));
-              if (agendas === null) {
-                setAgendas(format);
-                setClickedAgendaId(agendas.id);
-              }
-              setAgendas(format);
-            })
-            .catch((error) => {
-              console.error("마이페이지 정보 가져오기 실패:", error);
-            });
-
-        }
-      })
-      .catch((error) => {
-        console.error("마이페이지 정보 가져오기 실패:", error);
-      });
-
+  function handleAddAgenda() {
+    run(async () => {
+      const agenda = await addAgenda(roomId, "안건 제목");
+      // 첫 안건이면 바로 현재 안건으로
+      if (clickedAgendaId === null) await setCurrentAgenda(roomId, agenda.id);
+      refreshAgendas();
+      queryClient.invalidateQueries({ queryKey: ["room", roomId] });
+    });
   }
-  function deleteAgenda(id) {
-    if (id === clickedAgendaId) {
-      setClickedAgendaId(null);
-      setActionAgendaChange(null);
-      setConfigReset(id+1);
-    }
-
-    axios
-      .delete(
-        `${process.env.REACT_APP_HOST_URL}/agenda/${id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-      .then((res) => {
-        if (res.status === 200) {
-          axios
-            .get(
-              `${process.env.REACT_APP_HOST_URL}/room/${roomId}/agenda`,
-              {
-                headers: {
-                  Authorization: `Bearer ${token}`,
-                },
-              })
-            .then((res) => {
-              const Agendaformat = res.data.map(item => ({
-                id: item.agenda.agendaId,
-                name: item.agenda.name,
-              }));
-              setAgendas(Agendaformat);
-            })
-            .catch((error) => {
-              console.error("마이페이지 정보 가져오기 실패:", error);
-            });
-        }
-      })
-      .catch((error) => {
-        console.error("실패:", error);
-      });
+  function handleDeleteAgenda(id) {
+    run(async () => {
+      await deleteAgenda(id);
+      refreshAgendas();
+      queryClient.invalidateQueries({ queryKey: ["room", roomId] });
+    });
   }
   function EditAgenda(e, id) {
-    if (e.key === "Enter") {
-      axios
-        .patch(`${process.env.REACT_APP_HOST_URL}/agenda/${id}`,
-          {
-            name: e.target.value,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          })
-        .then((res) => {
-          if (res.status === 200) {
-            // setAgendas(prev => prev.map(agenda => agenda.id === id ? { ...agenda, name: e.target.value } : agenda));
-            axios
-              .get(
-                `${process.env.REACT_APP_HOST_URL}/room/${roomId}/agenda`,
-                {
-                  headers: {
-                    Authorization: `Bearer ${token}`,
-                  },
-                })
-              .then((res) => {
-                const format = res.data.map(item => ({
-                  id: item.agenda.agendaId,
-                  name: item.agenda.name,
-                }));
-
-                setAgendas(format);
-              })
-              .catch((error) => {
-                console.error("마이페이지 정보 가져오기 실패:", error);
-              });
-
-          }
-        })
-        .catch((error) => {
-          console.error("실패:", error);
-        });
-      setChanged(null);
-    }
-
+    if (e.key !== "Enter") return;
+    const name = e.target.value.trim();
+    setChanged(null);
+    if (!name) return;
+    run(async () => {
+      await updateAgenda(id, { name });
+      refreshAgendas();
+    });
   }
-
-
 
   return (
     <div className={style.Maindiv}>
@@ -279,7 +120,7 @@ function LeftList({ token, isHost, roomId, roomName, deleteModal, socketAgendas,
         <div className={style.Left}>
           {roomName}
         </div>
-        {isHost && <img alt="setting" src={setting} onClick={() => handleSetting()} />}
+        {isHost && <img alt="setting" src={setting} onClick={() => setSetting(!Setting)} />}
       </div>
 
       <hr />
@@ -287,17 +128,18 @@ function LeftList({ token, isHost, roomId, roomName, deleteModal, socketAgendas,
       {Setting ?
         <div className={style.Setting}>
           <div className={style.SettingDiv}>
-            <h2 onClick={() => handleSetting()} >+</h2>
+            <h2 onClick={() => setSetting(false)} >+</h2>
             <form onSubmit={(e) => {
-              handleEditRoom(e);
               e.preventDefault();
+              handleEditRoom();
             }}>
               <label>회의 이름 변경
                 <div className={style.Input}>
                   <input
                     placeholder={roomName}
-                    id="newRoomName"
                     maxLength='12'
+                    value={newRoomName}
+                    onChange={(e) => setNewRoomName(e.target.value)}
                   />
                 </div>
               </label>
@@ -305,20 +147,18 @@ function LeftList({ token, isHost, roomId, roomName, deleteModal, socketAgendas,
               <label>방 비밀번호 변경
                 <div className={style.Input}>
                   <input
-                    id="newPassword"
-                    type="password"
+                    type={showPassword ? "text" : "password"}
+                    inputMode="numeric"
                     minLength='4'
                     maxLength='4'
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
                   />
-                  <img alt="visible" src={visible} onClick={() => handleVisible()} />
+                  <img alt="visible" src={visible} onClick={() => setShowPassword(!showPassword)} />
                 </div>
               </label>
 
-              <button
-                type="submit"
-
-
-              >변경하기</button>
+              <button type="submit">변경하기</button>
               <div className={style.Tip}>
                 <img alt="tipicon" src={tip} />
                 삭제하기 버튼을 누르면 이 방의 모든 회의 기록과 <br />
@@ -344,12 +184,11 @@ function LeftList({ token, isHost, roomId, roomName, deleteModal, socketAgendas,
                 onMouseEnter={() => setHover(agenda.id)}
                 onMouseLeave={() => setHover(null)}
                 key={agenda.id}
-                id={agenda.id}
-                className={blockId === agenda.id ? style.ChosenBlock : style.Block}
-                onClick={(e) => isHost && handleBlock(e)}
+                className={clickedAgendaId === agenda.id ? style.ChosenBlock : style.Block}
+                onClick={() => isHost && onSelectAgenda(agenda.id)}
               >
                 <div className={style.Text} onDoubleClick={() => isHost && setChanged(agenda.id)}>
-                  <span>•</span> {Changed === agenda.id ? <input id="newAgendaName" ref={inputRef} onKeyDown={(e) => isHost && EditAgenda(e, agenda.id)} placeholder={agenda.name} /> : <h1>{agenda.name}</h1>}
+                  <span>•</span> {Changed === agenda.id ? <input ref={inputRef} onKeyDown={(e) => EditAgenda(e, agenda.id)} placeholder={agenda.name} /> : <h1>{agenda.name}</h1>}
                 </div>
                 {hover === agenda.id && isHost && <h3 alt="option"
                   onClick={(e) => {
@@ -359,7 +198,6 @@ function LeftList({ token, isHost, roomId, roomName, deleteModal, socketAgendas,
                   <div className={style.Modal} ref={ModalRef}>
                     <div className={style.Options}>
                       <div className={style.Edit} onClick={(e) => {
-
                         setChanged(agenda.id);
                         setModalId(null);
                         e.stopPropagation();
@@ -367,9 +205,8 @@ function LeftList({ token, isHost, roomId, roomName, deleteModal, socketAgendas,
                         <img alt="edit" src={edit} />
                         이름 변경
                       </div>
-                      <div className={style.Dlt} id={agenda.id} onClick={(e) => {
-
-                        deleteAgenda(agenda.id);
+                      <div className={style.Dlt} onClick={(e) => {
+                        handleDeleteAgenda(agenda.id);
                         setModalId(null);
                         e.stopPropagation();
                       }}>
@@ -382,7 +219,7 @@ function LeftList({ token, isHost, roomId, roomName, deleteModal, socketAgendas,
               </div>))}
 
           </div>
-          {isHost && <div className={style.Add} onClick={() => addAgenda()}>
+          {isHost && <div className={style.Add} onClick={() => handleAddAgenda()}>
             <img alt="add" src={add} />&nbsp;안건을 추가해주세요
           </div>}
         </div>
@@ -390,14 +227,7 @@ function LeftList({ token, isHost, roomId, roomName, deleteModal, socketAgendas,
       {!isHost && <div className={style.space}></div>}
       <hr />
 
-      <Timer
-        //웹소켓 타이머
-        socketTimer={socketTimer}
-        //
-        isHost={isHost}
-        roomId={roomId}
-        token={token}
-      />
+      <Timer isHost={isHost} roomId={roomId} />
     </div >
   );
 }

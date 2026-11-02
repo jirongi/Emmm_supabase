@@ -1,30 +1,21 @@
 import { useEffect, useRef, useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 
 import style from "../CSS/Header.module.css";
 
 import copy from "../asset/icon-copy.png";
 import logo from "../asset/icon-logo.png";
 import out from "../asset/icon-out.png";
+import { useAuth } from "../auth/AuthProvider";
+import { setRoomState } from "../api/rooms";
+import { errorMessage } from "../api/errors";
 
 //사이트 메인 아이콘 + 구글 아이콘 + 방번호 + 완료/진행중 상태
-function Header({
-  setLogoutmodal,
-  setEmail,
-  setName,
-  setPicture,
-  setState,
-  token,
-  isHost,
-  code,
-  state,
-  roomId,
-  name,
-  email,
-  picture,
-}) {
+function Header({ setLogoutmodal, isHost, code, state, roomId }) {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { profile } = useAuth();
   const [profileOpen, setProfileOpen] = useState(false);
   const ModalRef = useRef(null);
 
@@ -41,72 +32,24 @@ function Header({
       document.removeEventListener("mousedown", HandClickoutsideofModal);
   }, [ModalRef]);
 
-  useEffect(() => {
-    const user = localStorage.getItem("userInfo");
-
-    if (!token && !user) {
-      navigate("/home");
-    }
-
-    setName(JSON.parse(user).name);
-    setEmail(JSON.parse(user).email);
-    setPicture(JSON.parse(user).profileUrl);
-  }, [token, navigate, setName, setEmail, setPicture]);
-
-  function handleButton() {
-    if (state === "running") {
-      axios
-        .patch(
-          `
-          ${process.env.REACT_APP_HOST_URL}/room/${roomId}/state`,
-          {
-            state: "complete",
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          },
-        )
-        .catch((error) => {
-          console.error("마이페이지 정보 가져오기 실패:", error);
-        });
-      return;
-    } else {
-      axios
-        .patch(
-          `
-          ${process.env.REACT_APP_HOST_URL}/room/${roomId}/state`,
-          {
-            state: "running",
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          },
-        )
-        .catch((error) => {
-          console.error("마이페이지 정보 가져오기 실패:", error);
-        });
+  async function handleButton() {
+    try {
+      await setRoomState(roomId, state === "running" ? "complete" : "running");
+      queryClient.invalidateQueries({ queryKey: ["room", roomId] });
+    } catch (error) {
+      alert(errorMessage(error));
     }
   }
 
   function handleRoomNumber() {
-    navigator.clipboard.writeText(
-      document.getElementById("RoomNumber").innerText,
-    );
+    navigator.clipboard.writeText(code);
     alert("클립이 복사되었습니다!");
-  }
-
-  function backtohome() {
-    navigate("/home");
   }
 
   return (
     <div className={style.Maindiv}>
       <div className={style.Left}>
-        <img src={logo} alt="logo" onClick={() => backtohome()} />
+        <img src={logo} alt="logo" onClick={() => navigate("/home")} />
       </div>
 
       <div className={style.Right}>
@@ -117,29 +60,21 @@ function Header({
         >
           <strong>•</strong>&nbsp;{state === "running" ? "진행중" : "완료"}
         </div>
-        <div
-          id="RoomNumber"
-          className={style.Number}
-          onClick={() => handleRoomNumber()}
-        >
+        <div id="RoomNumber" className={style.Number} onClick={() => handleRoomNumber()}>
           {code}
           <img alt="copy" src={copy} />
         </div>
-        <img
-          alt="profileicon"
-          src={picture}
-          onClick={() => setProfileOpen(true)}
-        />
+        <img alt="profileicon" src={profile?.avatar_url} onClick={() => setProfileOpen(true)} />
 
         {/*--> 모달 <--*/}
-        {profileOpen ? (
+        {profileOpen && (
           <div className={style.ProfileModal} ref={ModalRef}>
             <div className={style.Maindiv}>
               <div className={style.Subdiv}>
-                <img src={picture} alt="googleicon" />
+                <img src={profile?.avatar_url} alt="googleicon" />
                 <div className={style.ModalInfo}>
-                  <div className={style.Name}>{name}</div>
-                  <span>{email}</span>
+                  <div className={style.Name}>{profile?.name}</div>
+                  <span>{profile?.email}</span>
                 </div>
               </div>
             </div>
@@ -153,8 +88,6 @@ function Header({
               로그아웃
             </button>
           </div>
-        ) : (
-          <></>
         )}
       </div>
     </div>

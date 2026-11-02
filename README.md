@@ -14,9 +14,23 @@ Domuksa_Supabase/
 │  ├─ migrations/   DB 스키마·권한·함수 SQL (파일 이름 순서대로 실행)
 │  ├─ functions/    Edge Function (ai-summary)
 │  └─ tests/        권한 테스트 SQL (마이그레이션 아님, SQL Editor에서 필요할 때 실행)
+├─ frontend/        React 앱 (Domuksa_Front 복사본을 Supabase로 교체)
 ├─ .env.example     프론트 환경변수 예시
 └─ README.md
 ```
+
+## 프론트 실행
+
+```bash
+cd frontend
+cp .env.example .env   # REACT_APP_SUPABASE_ANON_KEY 채우기
+npm install
+npm start              # http://localhost:3000
+```
+
+- 백엔드 호출은 전부 `frontend/src/api/`에 있고, 화면 컴포넌트는 이 함수만 부릅니다.
+- 실시간은 `frontend/src/hooks/useRealtime.js` (방·안건·투표 채널 + 접속자 Presence).
+- 로그인 상태는 `frontend/src/auth/AuthProvider.js`.
 
 `supabase/` 아래 구조는 Supabase CLI 규칙을 따릅니다. 나중에 CLI를 설치하면
 `npx supabase link --project-ref ktnsntefvnptssqbknlf` 후 `npx supabase db push`로 그대로 올릴 수 있습니다.
@@ -39,8 +53,8 @@ Domuksa_Supabase/
 | 3 | 권한(RLS) (`20261102000002_rls.sql`) | 완료 (적용됨) |
 | 4 | RPC 함수 (`20261102000003_rpc.sql`) + 테스트 (`tests/rls_smoke_test.sql`) | 완료 (적용됨, 테스트 35/35 통과) |
 | 5 | 실시간 · Storage (`20261102000004_realtime_storage.sql`) | 완료 (적용됨) |
-| 6 | 로그인 연결 확인 | 대기 |
-| 7 | 프론트 교체 | 대기 |
+| 6 | 로그인 연결 확인 | 7단계와 함께 확인 예정 |
+| 7 | 프론트 교체 + 타이머 보조 SQL (`20261102000005_timer_started_at.sql`) | 코드 작성·빌드 통과, SQL 적용·브라우저 확인 대기 |
 | 8 | AI 요약 Edge Function | 대기 |
 | 9 | 정리 | 대기 |
 

@@ -1,4 +1,6 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import styles from "../CSS/Home.module.css";
 import logoImg from "../asset/icon-logo.png";
 import addImg from "../asset/icon-add_white.png";
@@ -7,172 +9,86 @@ import Progress from "../component/Progress";
 import Archived from "../component/Archived";
 import Joinpw from "../component/Joinpw";
 import LogoutModal from "../component/LogoutModal";
-import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import { useAuth } from "../auth/AuthProvider";
+import { findRoom, getMyRooms, joinRoom } from "../api/rooms";
+import { errorMessage } from "../api/errors";
 
 function Home() {
   const navigate = useNavigate();
-
-  const [reset, setReset] = useState(false);
+  const { user, profile } = useAuth();
 
   const [Logoutmodal, setLogoutmodal] = useState(false);
-
   const [profileOpen, setProfileOpen] = useState(false);
-  const [pwOpen, setPwOpen] = useState(false);
-
-  const [token, setToken] = useState("");
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [picture, setPicture] = useState("");
-  const [userId, setUserId] = useState("");
-
-  const [progressRooms, setProgressRooms] = useState([]);
-  const [completeRooms, setCompleteRooms] = useState([]);
   const [isArchiveOpen, setIsArchiveOpen] = useState(false);
 
   const [value, setValue] = useState("");
-  const [code, setCode] = useState("");
+  // 비밀번호 입력이 필요한 방 { room_id, name }
+  const [pwRoom, setPwRoom] = useState(null);
 
-  const [roomId, setRoomId] = useState("");
-  const [isPassword, setIsPassword] = useState(false);
+  const { data: rooms = [] } = useQuery({
+    queryKey: ["myRooms", user.id],
+    queryFn: () => getMyRooms(user.id),
+  });
+  const progressRooms = rooms.filter((room) => room.state === "running");
+  const completeRooms = rooms.filter((room) => room.state === "complete");
 
-  function activeEnter(e) {
-    if (e.key === "Enter") {
-      setCode(value);
-    }
-  }
-
-  function joinRoom() {
-    if (isPassword === false && roomId !== "") {
-      axios
-        .post(`${process.env.REACT_APP_HOST_URL}/room/${roomId}/member`, {}, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        .then((res) => {
-          localStorage.setItem("role", res.data.role);
-          localStorage.setItem("roomId", res.data.roomId);
-
-          if (localStorage.getItem("role") === "member") navigate("/meet");
-        })
-        .catch((error) => {
-          console.error("참여할 룸 상태 정보 가져오기 실패:", error);
-        });
-    } else if (isPassword === true && roomId !== "") {
-      setPwOpen(true);
-      setIsPassword(false);
-    }
-  }
-
-  function isProfileOpen() {
-    if (profileOpen === false) {
-      setProfileOpen(true);
-    } else if (profileOpen === true) {
-      setProfileOpen(false);
-    }
-  }
-
-  useEffect(() => {
-    localStorage.removeItem("roomId");
-    localStorage.removeItem("role");
-    setToken(localStorage.getItem("accessToken"));
-    const user = JSON.parse(localStorage.getItem("userInfo"));
-    setUserId(user.id);
-    setName(user.name);
-    setEmail(user.email);
-    setPicture(user.profileUrl);
-
-    if (!token || !user) {
-      setReset(!reset);
+  async function enterCode() {
+    const code = value.trim();
+    if (code.length !== 10) {
+      alert("회의 코드는 10자리입니다.");
       return;
     }
-
-    axios
-      .get(`${process.env.REACT_APP_HOST_URL}/user/me/running`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((res) => {
-        setProgressRooms(res.data);
-      })
-      .catch((error) => {
-        console.error("진행중인 룸 상태 정보 가져오기 실패:", error);
-      });
-
-    axios
-      .get(`${process.env.REACT_APP_HOST_URL}/user/me/complete`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((res) => {
-        setCompleteRooms(res.data);
-      })
-      .catch((error) => {
-        console.error("완료된 룸 상태 정보 가져오기 실패:", error);
-      });
-  }, [reset, token, userId]);
-
-  useEffect(() => {
-    if (code !== null && code.length === 10) {
-      axios
-        .get(
-          `${process.env.REACT_APP_HOST_URL}/room/code?code=${code}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          },
-        )
-        .then((res) => {
-          setRoomId(res.data.roomId);
-          setIsPassword(res.data.password);
-          setCode("");
-        })
-        .catch((error) => {
-          console.error("룸 입장 코드 가져오기 실패:", error);
-        });
+    try {
+      const room = await findRoom(code);
+      try {
+        // 이미 멤버이거나 비밀번호 없는 방이면 바로 들어간다
+        await joinRoom(room.room_id);
+        navigate(`/meet/${room.room_id}`);
+      } catch (error) {
+        if (error.message === "wrong_password") setPwRoom(room);
+        else alert(errorMessage(error));
+      }
+    } catch (error) {
+      alert(errorMessage(error));
     }
+  }
 
-    if (roomId !== null) joinRoom();
-  }, [code, token, roomId]);
+  function activeEnter(e) {
+    if (e.key === "Enter") enterCode();
+  }
 
   return (
     <div>
       <div className={styles.extradiv}>
         <div className={styles.Maindiv}>
-          {pwOpen === true ? (
-            <Joinpw onChange={setPwOpen} token={token} roomId={roomId} />
-          ) : null}
+          {pwRoom && <Joinpw onChange={() => setPwRoom(null)} room={pwRoom} />}
 
           <div className={styles.header}>
             <img className={styles.logo} src={logoImg} alt="이음로고" />
 
             <div></div>
             <div className={styles.profile}>
-              {picture && (
+              {profile?.avatar_url && (
                 <img
                   className={styles.profileImg}
-                  src={picture}
+                  src={profile.avatar_url}
                   alt="프로필"
-                  onClick={isProfileOpen}
+                  onClick={() => setProfileOpen(!profileOpen)}
                 />
               )}
 
-              {profileOpen === true ? (
+              {profileOpen && (
                 <Profile
                   onChange={setProfileOpen}
                   Logoutmodal={setLogoutmodal}
-                  user={{ name: name, email: email, picture: picture }}
+                  user={{ name: profile?.name, email: profile?.email, picture: profile?.avatar_url }}
                 />
-              ) : null}
+              )}
             </div>
           </div>
 
           <div className={styles.menu}>
-            <div className={styles.new} onClick={(e) => navigate("/meet")}>
+            <div className={styles.new} onClick={() => navigate("/meet")}>
               <img className={styles.addBtn} src={addImg} alt="추가" />
             </div>
 
@@ -180,33 +96,20 @@ function Home() {
               회의 참여를 위해 코드를 입력해 주세요
               <input
                 className={styles.code}
+                value={value}
                 onChange={(e) => setValue(e.target.value)}
-                onKeyDown={(e) => activeEnter(e)}
+                onKeyDown={activeEnter}
               ></input>
             </div>
           </div>
 
           {isArchiveOpen === false ? (
-            <Progress
-              onChange={setIsArchiveOpen}
-              progressRoomList={progressRooms}
-            />
+            <Progress onChange={setIsArchiveOpen} progressRoomList={progressRooms} />
           ) : (
-            <Archived
-              onChange={setIsArchiveOpen}
-              isOpen={isArchiveOpen}
-              completeRoomList={completeRooms}
-            />
+            <Archived onChange={setIsArchiveOpen} completeRoomList={completeRooms} />
           )}
         </div>
-        {Logoutmodal === true ? (
-          <LogoutModal
-            setLogoutmodal={setLogoutmodal}
-            setName={setName}
-            setEmail={setEmail}
-            setPicture={setPicture}
-          />
-        ) : null}
+        {Logoutmodal && <LogoutModal setLogoutmodal={setLogoutmodal} />}
       </div>
     </div>
   );

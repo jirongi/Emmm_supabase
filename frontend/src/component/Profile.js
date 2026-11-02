@@ -4,10 +4,8 @@ import styles from "../CSS/Profile.module.css";
 
 import logoutIcon from "../asset/icon-out.png";
 import { useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
 
 function Profile({ onChange, user, Logoutmodal }) {
-  const navigate = useNavigate();
   const popup = useRef();
 
   function onLogout() {
@@ -32,14 +30,14 @@ function Profile({ onChange, user, Logoutmodal }) {
       <div className={styles.maindiv}>
         <div className={styles.profilePopup} ref={popup}>
           <div className={styles.info}>
-            <img className={styles.profileImg} src={user.picture} />
+            <img className={styles.profileImg} src={user.picture} alt="프로필" />
             <div className={styles.text}>
               <div className={styles.name}>{user.name}</div>
               <div className={styles.email}>{user.email}</div>
             </div>
           </div>
           <div className={styles.logout} onClick={onLogout}>
-            <img className={styles.logoutIcon} src={logoutIcon} />
+            <img className={styles.logoutIcon} src={logoutIcon} alt="" />
             로그아웃
           </div>
         </div>

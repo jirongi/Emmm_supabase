@@ -1,18 +1,18 @@
 import Home from "./page/Home";
 import Meet from "./page/Meet";
-import Archived from "./component/Archived";
 import Landing from "./page/Landing";
-import Loading from "./component/loading";
-import { Route, Routes } from "react-router-dom";
+import ProtectedRoute from "./auth/ProtectedRoute";
+import { Navigate, Route, Routes } from "react-router-dom";
 
 function App() {
   return (
     <Routes>
-      <Route path="/" element= {<Landing />} />
-      <Route path="/home" element= {<Home />} />
-      <Route path="/meet" element= {<Meet />} />
-      <Route path="/loading" element= {<Loading />} />
-      <Route path="/archived" element={<Archived />} />
+      <Route path="/" element={<Landing />} />
+      <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+      {/* /meet = 새 회의 만들기, /meet/:roomId = 회의방 */}
+      <Route path="/meet" element={<ProtectedRoute><Meet /></ProtectedRoute>} />
+      <Route path="/meet/:roomId" element={<ProtectedRoute><Meet /></ProtectedRoute>} />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }

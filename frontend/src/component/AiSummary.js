@@ -1,7 +1,7 @@
 import ReactMarkdown from 'react-markdown'
 
-import { useEffect, useState } from "react";
-import axios from "axios";
+import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import style from "../CSS/AI.module.css";
 
 import buttonHoverbefore from "../asset/icon-AIsummaryHoverbefore.png";
@@ -9,96 +9,61 @@ import buttonHoverafter from "../asset/icon-AIsummaryHoverafter.png";
 import iconHoverbefore from "../asset/icon-emptyAIHoverbefore.png";
 import iconHoverafter from "../asset/icon-emptyAIHoverafter.png";
 import loading from "../asset/icon-loading.jpg";
+import { generateSummary, getSummary } from "../api/ai";
 
-function AI({ isHost, token, onChange, clickedAgendaId, AIState, socketAI }) {
-    const [summary, setSummary] = useState(null);
-    const [title, setTitle] = useState(null);
-
-    const [isSummaried, setIsSummaried] = useState(false); //요약 했었는지?
+function AI({ isHost, agendaId, onChange }) {
+    const queryClient = useQueryClient();
+    const [generating, setGenerating] = useState(false);
     const [iconAI, setIconAI] = useState(false); //아이콘 호버
     const [buttonAI, setButtonAI] = useState(false); //버튼 호버
 
-    useEffect(() => {
-        setIsSummaried(AIState);
+    // 요약이 저장되면 실시간 이벤트로 다시 불러온다 (기존 1초 폴링 제거)
+    const { data: summary } = useQuery({
+        queryKey: ["summary", agendaId],
+        queryFn: () => getSummary(agendaId),
+    });
 
-        const interval = setInterval(() => {
-
-            axios.get(`${process.env.REACT_APP_HOST_URL}/ai/${clickedAgendaId}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            })
-                .then((res) => {
-                    if (res.data.title && res.data.summaryText) {
-                        setTitle(res.data.title);
-                        setSummary(res.data.summaryText);
-                        clearInterval(interval);
-                    }
-                })
-                .catch(() => {
-                });
-
-        }, 1000);
-
-        return () => clearInterval(interval);
-
-    }, [socketAI,clickedAgendaId,token,AIState]);
-
-    function PostAI() {
-        setTitle(null);
-        setSummary(null);
-        setIsSummaried(true);
-        axios
-            .post(`${process.env.REACT_APP_HOST_URL}/ai/${clickedAgendaId}`,
-                {}, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            })
-            .catch((error) => {
-                console.error("마이페이지 정보 가져오기 실패:", error);
-            });
+    async function generate() {
+        if (!isHost) {
+            alert("AI 요약은 호스트만 시작할 수 있어요.");
+            return;
+        }
+        setGenerating(true);
+        try {
+            await generateSummary(agendaId);
+            queryClient.invalidateQueries({ queryKey: ["summary", agendaId] });
+        } catch {
+            alert("AI 요약을 만들지 못했습니다. 잠시 후 다시 시도해 주세요.");
+        } finally {
+            setGenerating(false);
+        }
     }
-    function PatchAI() {
-        axios
-            .patch(`${process.env.REACT_APP_HOST_URL}/ai/${clickedAgendaId}`, {}, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            })
-            .then((res) => {
-                if (res.status === 200 || res.status === 201) {
-                    setTitle(res.data.title);
-                    setSummary(res.data.summaryText);
-                }
-            })
-            .catch((error) => {
-                console.error("마이페이지 정보 가져오기 실패:", error);
-            });
-    }
+
+    const isSummaried = !!summary || generating;
+
     return (
         <div className={style.Maindiv}>
             <div className={style.Maintitle}>
                 <div className={style.Left}>
                     <h3>AI 요약</h3>
-                    {isSummaried && isHost && <img onClick={() => PatchAI()} alt="aisummaryBtn" src={buttonAI ? buttonHoverafter : buttonHoverbefore} onMouseEnter={() => setButtonAI(true)} onMouseLeave={() => setButtonAI(false)} />}
+                    {summary && isHost && !generating && <img onClick={() => generate()} alt="aisummaryBtn" src={buttonAI ? buttonHoverafter : buttonHoverbefore} onMouseEnter={() => setButtonAI(true)} onMouseLeave={() => setButtonAI(false)} />}
                 </div>
                 <h2 onClick={() => onChange("basic")} >+</h2>
             </div>
             {isSummaried ?
                 <div className={style.MarkdownBody}>
-                    {title !== null && summary !== null ? <>
-                        <h5>{title}</h5>
+                    {summary && !generating ? <>
+                        <h5>{summary.title}</h5>
                         <ReactMarkdown>
-                            {summary}
+                            {summary.summary_text}
                         </ReactMarkdown>
                     </> :
                         <img alt="loading" className={style.Loading} src={loading} />}
                 </div> :
                 <div className={style.NoAI}>
-                    <div className={style.NoAIdiv} onClick={() => { PostAI(); }} onMouseEnter={() => setIconAI(true)} onMouseLeave={() => setIconAI(false)}>
+                    <div className={style.NoAIdiv} onClick={() => generate()} onMouseEnter={() => setIconAI(true)} onMouseLeave={() => setIconAI(false)}>
                         <img alt='aiIcon' src={iconAI ? iconHoverafter : iconHoverbefore} />
-                        <h3>여기 눌러서 AI 요약을 시작하세요</h3>
+                        <h3>{isHost ? "여기 눌러서 AI 요약을 시작하세요" : "호스트가 AI 요약을 시작하면 여기에 보여요"}</h3>
                     </div>
                 </div>
             }
@@ -107,5 +72,3 @@ function AI({ isHost, token, onChange, clickedAgendaId, AIState, socketAI }) {
     );
 }
 export default AI;
-
-

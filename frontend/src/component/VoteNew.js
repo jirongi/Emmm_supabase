@@ -1,127 +1,56 @@
 import { useState } from "react";
-import axios from "axios";
 import style from '../CSS/Vote_new_modal.module.css';
+import { createVote } from "../api/votes";
+import { errorMessage } from "../api/errors";
 
-function NewVote({ token, setNewvote, Voteobj }) {
-
+// 제목과 옵션을 화면에서 모아 두었다가 "생성하기"에서 한 번에 저장한다.
+// (기존: 모달을 열기만 해도 서버에 빈 투표가 생기던 문제)
+function NewVote({ agendaId, onClose, onCreated }) {
+    const [title, setTitle] = useState("");
+    // { key, content } — key는 화면용 임시 번호
     const [options, setOptions] = useState([]);
+    const [nextKey, setNextKey] = useState(1);
+    const [saving, setSaving] = useState(false);
 
     function addOption() {
-        axios
-            .post(`${process.env.REACT_APP_HOST_URL}/vote/${Voteobj.vote.voteId}/option`,
-                {
-                    content: "옵션",
-                },
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                })
-            .then((res) => {
-                if (res.status === 200 || res.status === 201) {
-                    setOptions([...options, res.data]);
-                }
-            })
-            .catch((error) => {
-                console.error("마이페이지 정보 가져오기 실패:", error);
-            });
+        setOptions((prev) => [...prev, { key: nextKey, content: "" }]);
+        setNextKey((k) => k + 1);
     }
 
-    function editOption(e) {
-        axios
-            .patch(`${process.env.REACT_APP_HOST_URL}/vote/${e.target.id}/option`,
-                {
-                    content: e.target.value,
-                },
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                })
-            .then((res) => {
-                if (res.status === 200 || res.status === 201) {
-                    setOptions(prev =>
-                        prev.map(option =>
-                            option.voteOption.voteOptionId === parseInt(e.target.id)
-                                ? {
-                                    ...option,
-                                    voteOption: {
-                                        ...option.voteOption,
-                                        title: e.target.value,
-                                    },
-                                }
-                                : option
-                        )
-                    );
-                }
-            })
-            .catch((error) => {
-                console.error("마이페이지 정보 가져오기 실패:", error);
-            });
+    function editOption(key, content) {
+        setOptions((prev) => prev.map((option) => (option.key === key ? { ...option, content } : option)));
     }
-    function deleteOption(target) {
-        axios
-            .delete(`${process.env.REACT_APP_HOST_URL}/vote/${target.id}/option`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            })
-            .then((res) => {
-                if (res.status === 200 || res.status === 201) {
-                    setOptions(options.filter((option) => option.voteOption.voteOptionId !== parseInt(target.id)));
-                }
-            })
-            .catch((error) => {
-                console.error("마이페이지 정보 가져오기 실패:", error);
-            });
+
+    function deleteOption(key) {
+        setOptions((prev) => prev.filter((option) => option.key !== key));
     }
-    function Create() {
-        if (options.length < 2) {
+
+    async function Create() {
+        const contents = options.map((option) => option.content.trim()).filter(Boolean);
+        if (!title.trim()) {
+            alert("투표 안건 이름을 입력해주세요");
+            return;
+        }
+        if (contents.length < 2) {
             alert("투표를 생성하려면 옵션을 2개 이상 입력해주세요");
             return;
         }
-        const newtitle = document.getElementById("newVoteName").value;
-        axios
-            .patch(`${process.env.REACT_APP_HOST_URL}/vote/${Voteobj.vote.voteId}`,
-                {
-                    title: newtitle,
-                },
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                })
-            .then((res) => {
-                if (res.status === 200 || res.status === 201) {
-                    setNewvote(false);
-                }
-            })
-            .catch((error) => {
-                console.error("마이페이지 정보 가져오기 실패:", error);
-            });
-    }
-    function DeleteandOut() {
-        axios
-            .delete(`${process.env.REACT_APP_HOST_URL}/vote/${Voteobj.vote.voteId}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            })
-            .then((res) => {
-                if (res.status === 200 || res.status === 201) {
-                    setNewvote(false);
-                }
-            })
-            .catch((error) => {
-                console.error("마이페이지 정보 가져오기 실패:", error);
-            });
+        setSaving(true);
+        try {
+            await createVote(agendaId, title.trim(), contents);
+            onCreated();
+            onClose();
+        } catch (error) {
+            alert(errorMessage(error));
+            setSaving(false);
+        }
     }
 
     return (
         <div className={style.NewVote}>
             <div className={style.Maintitle}>
                 <h3>투표</h3>
-                <h2 onClick={() => DeleteandOut()}>+</h2>
+                <h2 onClick={onClose}>+</h2>
             </div>
             <div className={style.Subdiv}>
                 <div className={style.Subtitle}>
@@ -131,7 +60,12 @@ function NewVote({ token, setNewvote, Voteobj }) {
                 <div className={style.Votelist}>
                     <div className={style.Vote}>
                         <div className={style.VoteText}>
-                            <input id="newVoteName" placeholder="새로운 투표 안건을 입력하세요!" />
+                            <input
+                                placeholder="새로운 투표 안건을 입력하세요!"
+                                maxLength={100}
+                                value={title}
+                                onChange={(e) => setTitle(e.target.value)}
+                            />
                         </div>
                     </div>
 
@@ -139,24 +73,27 @@ function NewVote({ token, setNewvote, Voteobj }) {
                         <h3>옵션</h3>
                     </div>
 
-                    {options.map((option) => {
-                        return (
-                            <div id={option.voteOption.voteOptionId} key={option.voteOption.voteOptionId} className={style.Vote}>
-                                <div className={style.VoteText}>
-                                    <input id={option.voteOption.voteOptionId} placeholder="새로운 투표 안건을 입력하세요!" onBlur={(e) => editOption(e)} />
-                                </div>
-                                <h1 id={option.voteOption.voteOptionId} onClick={(e) => deleteOption(e.target)}>+</h1>
+                    {options.map((option) => (
+                        <div key={option.key} className={style.Vote}>
+                            <div className={style.VoteText}>
+                                <input
+                                    placeholder="옵션 내용을 입력하세요!"
+                                    maxLength={100}
+                                    value={option.content}
+                                    onChange={(e) => editOption(option.key, e.target.value)}
+                                />
                             </div>
-                        );
-                    })}
-                    <div className={style.Subsubtitle} onClick={() => addOption()}>
+                            <h1 onClick={() => deleteOption(option.key)}>+</h1>
+                        </div>
+                    ))}
+                    <div className={style.Subsubtitle} onClick={addOption}>
                         <h1>+</h1><h4>옵션 추가</h4>
                     </div>
 
                 </div>
                 <div className={style.Buttons}>
-                    <button className={style.Cancel} onClick={() => DeleteandOut()}>취소하기</button>
-                    <button className={style.Create} onClick={() => Create()}>생성하기</button>
+                    <button className={style.Cancel} onClick={onClose}>취소하기</button>
+                    <button className={style.Create} disabled={saving} onClick={() => Create()}>생성하기</button>
                 </div>
             </div>
         </div>

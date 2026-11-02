@@ -4,17 +4,18 @@ import { useRef, useState } from "react";
 import styles from "../CSS/Joinpw.module.css";
 
 import deleteIcon from "../asset/icon-delete.png";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { joinRoom } from "../api/rooms";
 
-function Joinpw({ onChange, token, roomId }) {
+function Joinpw({ onChange, room }) {
   const navigate = useNavigate();
   const inputRef1 = useRef(null);
   const inputRef2 = useRef(null);
   const inputRef3 = useRef(null);
   const inputRef4 = useRef(null);
 
-  const [inputNum, setInputNumber] = useState([]);
+  // 칸마다 입력한 숫자. 렌더와 무관하므로 state가 아니라 ref로 둔다.
+  const inputNum = useRef([]).current;
   const [password, setPassword] = useState("");
 
   const [wrongPw, setWrongPw] = useState("pwNomal");
@@ -127,40 +128,16 @@ function Joinpw({ onChange, token, roomId }) {
     setPassword(inputNum.join(""));
   }
 
-  function handleJoin() {
-    axios
-      .post(
-        `${process.env.REACT_APP_HOST_URL}/room/${roomId}/member/password`,
-        {
-          password: password,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      )
-      .then((res) => {
-        localStorage.setItem("role", res.data.role);
-        localStorage.setItem("roomId", res.data.roomId);
-        setInputNumber("");
-
-        if (localStorage.getItem("role") !== "member") {
-          setWrongPw("pwWrong");
-          setTimeout(function () {
-            setWrongPw("pwNomal");
-          }, 300);
-        }
-
-        if (localStorage.getItem("role") === "member") navigate("/meet");
-      })
-      .catch((error) => {
-        console.error("참여할 룸 상태 정보 가져오기 실패:", error);
-        setWrongPw("pwWrong");
-        setTimeout(function () {
-          setWrongPw("pwNomal");
-        }, 500);
-      });
+  async function handleJoin() {
+    try {
+      await joinRoom(room.room_id, password);
+      navigate(`/meet/${room.room_id}`);
+    } catch {
+      setWrongPw("pwWrong");
+      setTimeout(function () {
+        setWrongPw("pwNomal");
+      }, 500);
+    }
   }
 
   return (
@@ -175,7 +152,7 @@ function Joinpw({ onChange, token, roomId }) {
               onClick={() => onChange(false)}
             />
             <div className={styles.title}>
-              2026 두먹사 회의
+              {room.name}
               <br />
               <span>참여자 확인을 위한 4자리 숫자를 입력해 주세요</span>
             </div>

@@ -18,16 +18,18 @@ import simg2 from "../asset/landing-strength2.png";
 import simg3 from "../asset/landing-strength3.png";
 import handong from "../asset/icon-handong.png";
 import mutsa from "../asset/icon-mutsa.png";
+import { Navigate } from "react-router-dom";
+import { useAuth } from "../auth/AuthProvider";
+import { signIn } from "../api/auth";
 
 function Landing() {
-  localStorage.removeItem("accessToken");
-  localStorage.removeItem("memberId");
-  localStorage.removeItem("userInfo");
-  localStorage.removeItem("roomId");
+  const { loading, user } = useAuth();
 
   const handleGoogleLogin = () => {
-    window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.REACT_APP_GOOGLE_AUTH_CLIENT_ID}&redirect_uri=${process.env.REACT_APP_GOOGLE_AUTH_REDIRECT_URI}&response_type=code&scope=email profile`;
+    signIn();
   };
+
+  if (!loading && user) return <Navigate to="/home" replace />;
 
   return (
     <>
