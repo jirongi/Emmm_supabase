@@ -60,7 +60,10 @@ function Dm({ roomId, isHost }) {
     }
 
     async function sendInput() {
-        if (await sendMessage(input)) setInput("");
+        const content = input;
+        // 보내는 즉시 비우고, 실패하면 되돌린다 (저장 후에 비우면 그사이 입력한 내용이 지워짐)
+        setInput("");
+        if (!(await sendMessage(content))) setInput(content);
     }
 
     return (

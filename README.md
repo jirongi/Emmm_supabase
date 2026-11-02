@@ -64,7 +64,7 @@ CLI가 있으면 `npx supabase functions deploy ai-summary --project-ref ktnsnte
 | 5 | 실시간 · Storage (`20261102000004_realtime_storage.sql`) | 완료 (적용됨) |
 | 6 | 로그인 연결 확인 | 테스트 계정 로그인 확인, Google 로그인은 직접 확인 필요 |
 | 7 | 프론트 교체 + 타이머 보조 SQL (`20261102000005_timer_started_at.sql`) | 완료 (두 계정 브라우저 시험 18단계 통과) |
-| 8 | AI 요약 Edge Function (`supabase/functions/ai-summary`) | 코드 작성, 배포·시험 대기 |
+| 8 | AI 요약 Edge Function (`supabase/functions/ai-summary`) | 완료 (배포됨, 투표·코멘트·PDF 요약 확인, member 호출 403) |
 | 9 | 정리 | 대기 |
 
 ## 비밀 값 규칙

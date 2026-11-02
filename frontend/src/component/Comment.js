@@ -19,11 +19,13 @@ function Comment({ agendaId, onChange }) {
     async function commentWrite() {
         const content = input.trim();
         if (!content) return;
+        // 보내는 즉시 비운다. 저장이 끝난 뒤에 비우면 그사이 새로 쓴 내용까지 지워진다.
+        setInput("");
         try {
             await addComment(agendaId, content);
-            setInput("");
             queryClient.invalidateQueries({ queryKey: ["comments", agendaId] });
         } catch (error) {
+            setInput(content);
             alert(errorMessage(error));
         }
     }
