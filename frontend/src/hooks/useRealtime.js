@@ -16,13 +16,20 @@ function listen(channel, table, filter, onChange) {
 export function useRoomRealtime(roomId, user, profile, { onRemoved } = {}) {
   const queryClient = useQueryClient();
   const [onlineIds, setOnlineIds] = useState([]);
+  // 방 삭제 시 rooms·room_members DELETE가 함께 오므로 한 번만 알린다
+  const removedRef = useRef(false);
   const onRemovedRef = useRef(onRemoved);
-  onRemovedRef.current = onRemoved;
+  onRemovedRef.current = () => {
+    if (removedRef.current) return;
+    removedRef.current = true;
+    onRemoved?.();
+  };
 
   const profileName = profile?.name;
 
   useEffect(() => {
     if (!roomId || !user) return;
+    removedRef.current = false;
     const refresh = (key) => () => queryClient.invalidateQueries({ queryKey: [key, roomId] });
     const byRoom = `room_id=eq.${roomId}`;
 

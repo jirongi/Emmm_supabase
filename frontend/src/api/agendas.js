@@ -1,5 +1,6 @@
 import { supabase } from "../lib/supabase";
 import { unwrap } from "./errors";
+import { removeStoredFiles } from "./files";
 
 export async function getAgendas(roomId) {
   return unwrap(
@@ -44,5 +45,6 @@ export async function updateAgenda(agendaId, fields) {
 }
 
 export async function deleteAgenda(agendaId) {
+  await removeStoredFiles([agendaId]);
   unwrap(await supabase.from("agendas").delete().eq("id", agendaId));
 }

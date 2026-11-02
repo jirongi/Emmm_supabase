@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import style from "../CSS/UserState.module.css";
 import { getMembers } from "../api/rooms";
+import { avatarSrc } from "../lib/avatar";
 
 // 접속자 = 방 멤버 중 Presence에 들어와 있는 사람
 function UserState({ roomId, onlineIds }) {
@@ -14,7 +15,7 @@ function UserState({ roomId, onlineIds }) {
 
     const renderUser = (member) => (
         <div key={member.user_id} className={style.user}>
-            <img alt="icon" src={member.profiles?.avatar_url} />
+            <img alt="icon" src={avatarSrc(member.profiles?.avatar_url)} />
             <h2>{member.profiles?.name}</h2>
         </div>
     );

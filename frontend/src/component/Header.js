@@ -10,6 +10,7 @@ import out from "../asset/icon-out.png";
 import { useAuth } from "../auth/AuthProvider";
 import { setRoomState } from "../api/rooms";
 import { errorMessage } from "../api/errors";
+import { avatarSrc } from "../lib/avatar";
 
 //사이트 메인 아이콘 + 구글 아이콘 + 방번호 + 완료/진행중 상태
 function Header({ setLogoutmodal, isHost, code, state, roomId }) {
@@ -64,14 +65,14 @@ function Header({ setLogoutmodal, isHost, code, state, roomId }) {
           {code}
           <img alt="copy" src={copy} />
         </div>
-        <img alt="profileicon" src={profile?.avatar_url} onClick={() => setProfileOpen(true)} />
+        <img alt="profileicon" src={avatarSrc(profile?.avatar_url)} onClick={() => setProfileOpen(true)} />
 
         {/*--> 모달 <--*/}
         {profileOpen && (
           <div className={style.ProfileModal} ref={ModalRef}>
             <div className={style.Maindiv}>
               <div className={style.Subdiv}>
-                <img src={profile?.avatar_url} alt="googleicon" />
+                <img src={avatarSrc(profile?.avatar_url)} alt="googleicon" />
                 <div className={style.ModalInfo}>
                   <div className={style.Name}>{profile?.name}</div>
                   <span>{profile?.email}</span>

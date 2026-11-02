@@ -41,7 +41,7 @@ function Meet() {
     enabled: !!roomId,
     retry: false,
   });
-  const { data: agendas = [] } = useQuery({
+  const { data: agendas = [], isSuccess: agendasLoaded } = useQuery({
     queryKey: ["agendas", roomId],
     queryFn: () => getAgendas(roomId),
     enabled: !!roomId,
@@ -84,7 +84,8 @@ function Meet() {
     );
   }
 
-  if (!room || !role) return null;
+  // 안건 목록까지 받은 뒤 그린다 (먼저 그리면 현재 안건이 잠깐 "선택 안 됨"으로 보임)
+  if (!room || !role || !agendasLoaded) return null;
 
   return (
     <div className={style.extradiv}>

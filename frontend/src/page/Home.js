@@ -12,6 +12,7 @@ import LogoutModal from "../component/LogoutModal";
 import { useAuth } from "../auth/AuthProvider";
 import { findRoom, getMyRooms, joinRoom } from "../api/rooms";
 import { errorMessage } from "../api/errors";
+import { avatarSrc } from "../lib/avatar";
 
 function Home() {
   const navigate = useNavigate();
@@ -68,10 +69,10 @@ function Home() {
 
             <div></div>
             <div className={styles.profile}>
-              {profile?.avatar_url && (
+              {profile && (
                 <img
                   className={styles.profileImg}
-                  src={profile.avatar_url}
+                  src={avatarSrc(profile.avatar_url)}
                   alt="프로필"
                   onClick={() => setProfileOpen(!profileOpen)}
                 />
@@ -81,7 +82,7 @@ function Home() {
                 <Profile
                   onChange={setProfileOpen}
                   Logoutmodal={setLogoutmodal}
-                  user={{ name: profile?.name, email: profile?.email, picture: profile?.avatar_url }}
+                  user={{ name: profile?.name, email: profile?.email, picture: avatarSrc(profile?.avatar_url) }}
                 />
               )}
             </div>

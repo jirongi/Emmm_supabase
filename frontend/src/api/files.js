@@ -39,6 +39,16 @@ export async function getFileUrls(paths) {
   return Object.fromEntries(rows.map((row) => [row.path, row.signedUrl]));
 }
 
+// 안건·방을 지우면 files 행은 DB에서 함께 지워지지만 Storage 객체는 남으므로 먼저 지운다 (host 권한)
+export async function removeStoredFiles(agendaIds) {
+  if (agendaIds.length === 0) return;
+  const rows = unwrap(
+    await supabase.from("files").select("storage_path").in("agenda_id", agendaIds),
+  );
+  if (rows.length === 0) return;
+  unwrap(await supabase.storage.from(BUCKET).remove(rows.map((row) => row.storage_path)));
+}
+
 export async function deleteFile(file) {
   unwrap(await supabase.from("files").delete().eq("id", file.id));
   await supabase.storage.from(BUCKET).remove([file.storage_path]);

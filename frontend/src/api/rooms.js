@@ -1,5 +1,6 @@
 import { supabase } from "../lib/supabase";
 import { unwrap } from "./errors";
+import { removeStoredFiles } from "./files";
 
 // 내가 참여한 방 전체. state로 진행중/완료를 나눠 쓴다.
 export async function getMyRooms(userId) {
@@ -81,5 +82,7 @@ export async function setCurrentAgenda(roomId, agendaId) {
 }
 
 export async function deleteRoom(roomId) {
+  const agendas = unwrap(await supabase.from("agendas").select("id").eq("room_id", roomId));
+  await removeStoredFiles(agendas.map((agenda) => agenda.id));
   unwrap(await supabase.from("rooms").delete().eq("id", roomId));
 }

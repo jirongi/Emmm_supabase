@@ -21,6 +21,7 @@ import mutsa from "../asset/icon-mutsa.png";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthProvider";
 import { signIn } from "../api/auth";
+import DevLogin from "../component/DevLogin";
 
 function Landing() {
   const { loading, user } = useAuth();
@@ -220,6 +221,7 @@ function Landing() {
           </div>
         </div>
       </div>
+      <DevLogin />
     </>
   );
 }
