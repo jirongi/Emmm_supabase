@@ -34,7 +34,7 @@ Domuksa_Supabase/
 | --- | --- | --- |
 | 0 | Supabase 프로젝트, Google 로그인, Redirect URL | 완료 |
 | 1 | 작업 폴더 구성 | 완료 |
-| 2 | DB 스키마 | 대기 |
+| 2 | DB 스키마 (`20261102000001_schema.sql`) | SQL 작성, 적용 대기 |
 | 3 | 권한(RLS) | 대기 |
 | 4 | RPC 함수 | 대기 |
 | 5 | 실시간 · Storage | 대기 |
