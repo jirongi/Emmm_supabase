@@ -38,8 +38,11 @@ hr {
 }
 
 .Setting {
-  margin: 15px 15px 15px 30px;
+  /* 안건 목록(.Agenda)과 같은 450px. 위아래 여백을 두면 타이머가 아래로 밀려 버튼이 잘린다 */
+  margin: 0 15px 0 30px;
   height: 450px;
+  /* 안쪽 h2의 margin이 바깥으로 겹쳐 나가지 않게 */
+  display: flow-root;
 
   form {
     font-size: 12px;
