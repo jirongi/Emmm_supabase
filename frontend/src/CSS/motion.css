@@ -265,8 +265,11 @@ label[for]:active,
   }
 }
 
-/* 커스텀 커서(CustomCursor.js)를 쓰는 동안 기본 커서는 숨긴다 */
-html.custom-cursor,
-html.custom-cursor * {
-  cursor: none !important;
+
+/* 안건 이름을 고치는 중이거나 ⋮ 메뉴가 열린 안건은 움직이지 않는다 (누르는 동안 메뉴가 밀려 클릭이 빗나감) */
+[class*="Left_Editing__"]:hover,
+[class*="Left_Editing__"]:active,
+[class^="Left_Block__"]:has([class^="Left_Modal__"]):active,
+[class^="Left_ChosenBlock__"]:has([class^="Left_Modal__"]):active {
+  transform: none;
 }

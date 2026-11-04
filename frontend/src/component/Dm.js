@@ -94,62 +94,63 @@ function Dm({ roomId, isHost }) {
     }
 
     return (
-        <div className={style.DM} onClick={() => setModalChat(true)}>
+        <div className={style.DM}>
             {EmojiModal &&
                 <div ref={ModalRef} className={style.EmojiModal}>
                     <EmojiPicker onEmojiClick={(emojiObject) => setInput((prev) => prev + emojiObject.emoji)} />
                 </div>
             }
-            <div className={style.DMdiv}>
+            <div className={style.DMdiv} onClick={() => setModalChat(true)}>
                 <img alt="DM" src={DM} />
                 {unread > 0 && !modalChat && <span key={unread} className={style.Badge}>{unread > 99 ? "99+" : unread}</span>}
-                {modalChat && <div className={style.ModalChat}>
-                    <div className={style.Top}>
-                        <h3>{isHost ? "받은 메세지" : "To.호스트"}</h3>
-                        <p onClick={(e) => {
-                            e.stopPropagation();
-                            setModalChat(false);
-                        }}>+</p>
-                    </div>
-                    <hr />
-                    <div ref={ChatRef} className={style.ChatList}>
-                        {messages.map((message) => (
-                            isHost ?
-                                <div key={message.id} className={style.HostTextBox}>
-                                    <div className={style.Text}>{message.content}</div>
-                                    {timeAgo(message.created_at, now)}
-                                </div>
-                                :
-                                <div key={message.id} className={style.TextBox}>
-                                    {timeAgo(message.created_at, now)}
-                                    <div className={style.Text}>{message.content}</div>
-                                </div>
-                        ))}
-
-                    </div>
-                    {!isHost && <div className={style.Bottom}>
-                        <div className={style.Buttons}>
-                            <button onClick={(e) => sendMessage(e.currentTarget.innerText)}>천천히해주세요...</button>
-                            <button onClick={(e) => sendMessage(e.currentTarget.innerText)}>5분만쉬어요</button>
-                            <button onClick={(e) => sendMessage(e.currentTarget.innerText)}>힘들어요</button>
-                        </div>
-                        <div className={style.Inputdiv}>
-                            <img alt="emoji" className={style.Emoji} src={emoji} onClick={() => setEmojiModal(true)} />
-                            <input
-                                value={input}
-                                maxLength={1000}
-                                onChange={(e) => setInput(e.target.value)}
-                                onKeyDown={(e) => {
-                                    if (e.key === "Enter" && !e.nativeEvent.isComposing) {
-                                        e.preventDefault();
-                                        sendInput();
-                                    }
-                                }} />
-                            <img alt="send" className={style.Send} src={send} onClick={() => sendInput()} />
-                        </div>
-                    </div>}
-                </div>}
             </div>
+            {/* 창은 버튼(DMdiv) 바깥에 둔다: 버튼의 누름 효과(작아짐)가 창까지 움직이면 × 클릭이 빗나가 창이 다시 열렸다 */}
+            {modalChat && <div className={style.ModalChat} onClick={(e) => e.stopPropagation()}>
+                <div className={style.Top}>
+                    <h3>{isHost ? "받은 메세지" : "To.호스트"}</h3>
+                    <p onClick={(e) => {
+                        e.stopPropagation();
+                        setModalChat(false);
+                    }}>+</p>
+                </div>
+                <hr />
+                <div ref={ChatRef} className={style.ChatList}>
+                    {messages.map((message) => (
+                        isHost ?
+                            <div key={message.id} className={style.HostTextBox}>
+                                <div className={style.Text}>{message.content}</div>
+                                {timeAgo(message.created_at, now)}
+                            </div>
+                            :
+                            <div key={message.id} className={style.TextBox}>
+                                {timeAgo(message.created_at, now)}
+                                <div className={style.Text}>{message.content}</div>
+                            </div>
+                    ))}
+
+                </div>
+                {!isHost && <div className={style.Bottom}>
+                    <div className={style.Buttons}>
+                        <button onClick={(e) => sendMessage(e.currentTarget.innerText)}>천천히해주세요...</button>
+                        <button onClick={(e) => sendMessage(e.currentTarget.innerText)}>5분만쉬어요</button>
+                        <button onClick={(e) => sendMessage(e.currentTarget.innerText)}>힘들어요</button>
+                    </div>
+                    <div className={style.Inputdiv}>
+                        <img alt="emoji" className={style.Emoji} src={emoji} onClick={() => setEmojiModal(true)} />
+                        <input
+                            value={input}
+                            maxLength={1000}
+                            onChange={(e) => setInput(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === "Enter" && !e.nativeEvent.isComposing) {
+                                    e.preventDefault();
+                                    sendInput();
+                                }
+                            }} />
+                        <img alt="send" className={style.Send} src={send} onClick={() => sendInput()} />
+                    </div>
+                </div>}
+            </div>}
         </div>
     );
 }

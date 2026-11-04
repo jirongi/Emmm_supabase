@@ -17,8 +17,11 @@ import { errorMessage } from "../api/errors";
 function LeftList({ isHost, roomId, roomName, agendas, clickedAgendaId, onSelectAgenda, deleteModal }) {
   const queryClient = useQueryClient();
 
-  //[안건이름변경]
+  //[안건이름변경] 고치는 중인 안건 id와 입력값
   const [Changed, setChanged] = useState(null);
+  const [draft, setDraft] = useState("");
+  const [savedId, setSavedId] = useState(null);
+  const cancelEdit = useRef(false);
 
   //안건 hover전용
   const [hover, setHover] = useState(null);
@@ -34,15 +37,11 @@ function LeftList({ isHost, roomId, roomName, agendas, clickedAgendaId, onSelect
 
   //Ref
   const ModalRef = useRef(null);
-  const inputRef = useRef(null);
 
   useEffect(() => {
     function HandClickoutsideofModal(e) {
       if (ModalRef.current && !ModalRef.current.contains(e.target)) {
         setModalId(null);
-      }
-      if (inputRef.current && !inputRef.current.contains(e.target)) {
-        setChanged(null);
       }
     }
     document.addEventListener("mousedown", HandClickoutsideofModal);
@@ -50,7 +49,14 @@ function LeftList({ isHost, roomId, roomName, agendas, clickedAgendaId, onSelect
     return () => {
       document.removeEventListener("mousedown", HandClickoutsideofModal);
     }
-  }, [ModalId, inputRef]);
+  }, [ModalId]);
+
+  // 저장 직후 이름이 한 번 반짝이는 효과를 끝낸다
+  useEffect(() => {
+    if (savedId === null) return;
+    const t = setTimeout(() => setSavedId(null), 700);
+    return () => clearTimeout(t);
+  }, [savedId]);
 
   const refreshAgendas = () => queryClient.invalidateQueries({ queryKey: ["agendas", roomId] });
 
@@ -103,14 +109,31 @@ function LeftList({ isHost, roomId, roomName, agendas, clickedAgendaId, onSelect
       queryClient.invalidateQueries({ queryKey: ["room", roomId] });
     });
   }
-  function EditAgenda(e, id) {
-    if (e.key !== "Enter") return;
-    const name = e.target.value.trim();
+  // 이름 고치기: 지금 이름이 채워진 채로 시작, Enter나 바깥 클릭이면 저장, Esc면 취소
+  function startEdit(agenda) {
+    cancelEdit.current = false;
+    setDraft(agenda.name);
+    setChanged(agenda.id);
+    setModalId(null);
+  }
+  function finishEdit(agenda) {
     setChanged(null);
-    if (!name) return;
+    if (cancelEdit.current) {
+      cancelEdit.current = false;
+      return;
+    }
+    const name = draft.trim();
+    if (!name || name === agenda.name) return;
+    // 저장 응답을 기다리지 않고 새 이름을 바로 보여 준다 (예전엔 옛 이름이 잠깐 다시 보였다)
+    queryClient.setQueryData(["agendas", roomId], (list = []) =>
+      list.map((a) => (a.id === agenda.id ? { ...a, name } : a)));
+    setSavedId(agenda.id);
     run(async () => {
-      await updateAgenda(id, { name });
-      refreshAgendas();
+      try {
+        await updateAgenda(agenda.id, { name });
+      } finally {
+        refreshAgendas();
+      }
     });
   }
 
@@ -179,18 +202,47 @@ function LeftList({ isHost, roomId, roomName, agendas, clickedAgendaId, onSelect
         <div className={style.Agenda}>
           <div className={style.List}>
 
-            {agendas.map((agenda) => (
+            {agendas.map((agenda) => {
+              const editing = Changed === agenda.id;
+              return (
               <div
                 onMouseEnter={() => setHover(agenda.id)}
                 onMouseLeave={() => setHover(null)}
                 key={agenda.id}
-                className={clickedAgendaId === agenda.id ? style.ChosenBlock : style.Block}
-                onClick={() => isHost && onSelectAgenda(agenda.id)}
+                className={[
+                  clickedAgendaId === agenda.id ? style.ChosenBlock : style.Block,
+                  editing && style.Editing,
+                  savedId === agenda.id && style.Saved,
+                ].filter(Boolean).join(" ")}
+                onClick={() => isHost && !editing && onSelectAgenda(agenda.id)}
               >
-                <div className={style.Text} onDoubleClick={() => isHost && setChanged(agenda.id)}>
-                  <span>•</span> {Changed === agenda.id ? <input ref={inputRef} onKeyDown={(e) => EditAgenda(e, agenda.id)} placeholder={agenda.name} /> : <h1>{agenda.name}</h1>}
+                <div className={style.Text} onDoubleClick={() => isHost && !editing && startEdit(agenda)}>
+                  <span>•</span>
+                  {editing ?
+                    <input
+                      className={style.NameInput}
+                      aria-label="안건 이름"
+                      autoFocus
+                      maxLength={100}
+                      value={draft}
+                      onFocus={(e) => e.target.select()}
+                      onChange={(e) => setDraft(e.target.value)}
+                      onClick={(e) => e.stopPropagation()}
+                      onKeyDown={(e) => {
+                        // 한글 조합 중 Enter는 글자 확정용이라 건너뛴다
+                        if (e.nativeEvent.isComposing) return;
+                        if (e.key === "Enter") e.currentTarget.blur();
+                        if (e.key === "Escape") {
+                          cancelEdit.current = true;
+                          e.currentTarget.blur();
+                        }
+                      }}
+                      onBlur={() => finishEdit(agenda)}
+                    />
+                    : <h1 title={agenda.name}>{agenda.name}</h1>}
                 </div>
-                {hover === agenda.id && isHost && <h3 alt="option"
+                {editing && <kbd className={style.Hint}>Enter ↵</kbd>}
+                {hover === agenda.id && isHost && !editing && <h3 alt="option"
                   onClick={(e) => {
                     handleOption(e, agenda.id);
                   }} >⋮</h3>}
@@ -198,8 +250,7 @@ function LeftList({ isHost, roomId, roomName, agendas, clickedAgendaId, onSelect
                   <div className={style.Modal} ref={ModalRef}>
                     <div className={style.Options}>
                       <div className={style.Edit} onClick={(e) => {
-                        setChanged(agenda.id);
-                        setModalId(null);
+                        startEdit(agenda);
                         e.stopPropagation();
                       }}>
                         <img alt="edit" src={edit} />
@@ -216,7 +267,8 @@ function LeftList({ isHost, roomId, roomName, agendas, clickedAgendaId, onSelect
                     </div>
                   </div>}
 
-              </div>))}
+              </div>);
+            })}
 
           </div>
           {isHost && <div className={style.Add} onClick={() => handleAddAgenda()}>

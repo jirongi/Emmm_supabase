@@ -95,3 +95,33 @@
     margin: auto auto 40px 40px;
   }
 }
+
+/* 카드에 마우스를 올리면 아이콘이 살짝 떠오르고, 아이콘 색으로 은은한 그림자 */
+.Block img,
+.BigBlock img {
+  transition:
+    filter 0.4s ease,
+    transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.Block:hover img,
+.BigBlock:hover img {
+  transform: translateY(-6px);
+}
+
+.Block:hover .imgFile {
+  filter: drop-shadow(0 14px 18px rgba(255, 196, 102, 0.5));
+}
+
+.Block:hover .imgComment {
+  filter: drop-shadow(0 14px 18px rgba(255, 150, 110, 0.45));
+}
+
+.Block:hover .imgVote {
+  filter: drop-shadow(0 14px 18px rgba(170, 130, 250, 0.45));
+}
+
+.BigBlock:hover .imgAI {
+  filter: drop-shadow(0 16px 20px rgba(90, 150, 132, 0.4));
+}
+

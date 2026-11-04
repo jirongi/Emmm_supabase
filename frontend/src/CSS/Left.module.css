@@ -187,6 +187,8 @@ hr {
         margin-left: 10px;
         display: flex;
         align-items: center;
+        flex: 1;
+        min-width: 0;
 
         span {
           font-size: 30px;
@@ -196,15 +198,29 @@ hr {
           font-size: 16px;
           color: #5a5a5a;
           font-weight: bold;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
 
+        /* 이름 고치기: 글자가 그 자리에서 그대로 입력칸이 된다 (크기·굵기 같게) */
         input {
-          font-size: 18px;
-          color: #5a5a5a;
-          margin: 0;
+          flex: 1;
+          min-width: 0;
+          margin: 0 8px 0 4px;
+          padding: 0;
           border: none;
-          width: 160px;
-          height: auto;
+          outline: none;
+          background: transparent;
+          font: inherit;
+          font-size: 16px;
+          font-weight: bold;
+          color: #191f28;
+          caret-color: #5043e7;
+        }
+
+        input::selection {
+          background-color: #e3e0ff;
         }
       }
 
@@ -300,6 +316,8 @@ hr {
         margin-left: 10px;
         display: flex;
         align-items: center;
+        flex: 1;
+        min-width: 0;
         color: #5043e7;
 
         span {
@@ -309,15 +327,29 @@ hr {
         h1 {
           font-size: 16px;
           font-weight: bold;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
 
+        /* 이름 고치기: 글자가 그 자리에서 그대로 입력칸이 된다 (크기·굵기 같게) */
         input {
-          font-size: 18px;
-          color: #5a5a5a;
-          /* font-weight: bold; */
-          margin: 0;
+          flex: 1;
+          min-width: 0;
+          margin: 0 8px 0 4px;
+          padding: 0;
           border: none;
-          width: 160px;
+          outline: none;
+          background: transparent;
+          font: inherit;
+          font-size: 16px;
+          font-weight: bold;
+          color: #191f28;
+          caret-color: #5043e7;
+        }
+
+        input::selection {
+          background-color: #e3e0ff;
         }
       }
 
@@ -377,6 +409,33 @@ hr {
         }
       }
     }
+
+    /* 이름 고치는 중: 보라 테두리 + 옅은 빛 */
+    .Editing {
+      border-color: #5043e7;
+      background-color: #ffffff;
+      box-shadow: 0 0 0 4px rgba(80, 67, 231, 0.12);
+      transition: box-shadow 0.25s ease, border-color 0.25s ease, background-color 0.25s ease;
+
+      .Hint {
+        flex-shrink: 0;
+        margin-right: 12px;
+        padding: 3px 7px;
+        border-radius: 8px;
+        background-color: #f2f1fe;
+        color: #7b6cf6;
+        font-family: inherit;
+        font-size: 10px;
+        font-weight: bold;
+        white-space: nowrap;
+        animation: hintIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+      }
+    }
+
+    /* 저장 직후 이름이 톡 */
+    .Saved h1 {
+      animation: nameSaved 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
   }
 
   .Add {
@@ -390,5 +449,19 @@ hr {
       width: 14px;
       height: auto;
     }
+  }
+}
+
+@keyframes hintIn {
+  from {
+    opacity: 0;
+    transform: translateX(6px) scale(0.8);
+  }
+}
+
+@keyframes nameSaved {
+  0% {
+    color: #5043e7;
+    transform: scale(0.92);
   }
 }

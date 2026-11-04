@@ -55,174 +55,176 @@
 
       animation: badgePop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), badgePulse 2s ease-out 0.5s infinite;
     }
+  }
 
-    .ModalChat {
-      position: absolute;
-      right: 0%;
-      bottom: 0%;
+  .ModalChat {
+    /* 버튼(DMdiv) 바깥에 있어 버튼의 호버·누름 효과가 창을 움직이지 않는다 */
+    z-index: 10000;
+    position: absolute;
+    right: 0%;
+    bottom: 0%;
 
+    width: 305px;
+    height: 400px;
+    border: 1px solid#E4E4E4;
+    border-radius: 15px;
+    background-color: #ffffff;
+
+    hr {
+      width: 100%;
+      color: #ededed48;
+    }
+
+    .Top {
+      display: flex;
+      align-items: center;
+      margin: 5px 0;
+
+      p {
+        margin: 0;
+        margin-left: auto;
+        margin-right: 18px;
+        transform: rotate(45deg);
+        font-size: 24px;
+        color: #b4b3b3;
+      }
+
+      p:hover {
+        color: #111111;
+      }
+
+      h3 {
+        font-size: 14px;
+        margin-left: 20px;
+      }
+    }
+
+    .ChatList {
+      overflow: scroll;
+      margin-right: 10px;
+      margin-top: 20px;
+      margin-bottom: 8px;
       width: 305px;
-      height: 400px;
-      border: 1px solid#E4E4E4;
-      border-radius: 15px;
-      background-color: #ffffff;
+      height: 57%;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
 
-      hr {
-        width: 100%;
-        color: #ededed48;
-      }
-
-      .Top {
-        display: flex;
-        align-items: center;
-        margin: 5px 0;
-
-        p {
-          margin: 0;
-          margin-left: auto;
-          margin-right: 18px;
-          transform: rotate(45deg);
-          font-size: 24px;
-          color: #b4b3b3;
-        }
-
-        p:hover {
-          color: #111111;
-        }
-
-        h3 {
-          font-size: 14px;
-          margin-left: 20px;
-        }
-      }
-
-      .ChatList {
-        overflow: scroll;
+      .TextBox {
+        margin-left: auto;
         margin-right: 10px;
-        margin-top: 20px;
-        margin-bottom: 8px;
-        width: 305px;
-        height: 57%;
         display: flex;
-        flex-direction: column;
-        gap: 8px;
+        align-items: flex-end;
 
-        .TextBox {
-          margin-left: auto;
-          margin-right: 10px;
-          display: flex;
-          align-items: flex-end;
+        color: #333333;
+        font-size: 10px;
 
-          color: #333333;
-          font-size: 10px;
+        .Text {
+          border-radius: 15px;
+          background-color: #5043e7;
+          color: white;
 
-          .Text {
-            border-radius: 15px;
-            background-color: #5043e7;
-            color: white;
+          width: auto;
+          height: auto;
 
-            width: auto;
-            height: auto;
+          margin-left: 4px;
+          padding: 13px 10px;
 
-            margin-left: 4px;
-            padding: 13px 10px;
-
-            font-size: 14px;
-          }
-        }
-
-        .HostTextBox {
-          margin-left: 10px;
-          margin-right: auto;
-
-          display: flex;
-          align-items: flex-end;
-
-          color: #333333;
-          font-size: 10px;
-
-          .Text {
-            border-radius: 15px;
-            background-color: #5043e7;
-            color: white;
-
-            width: auto;
-            height: auto;
-
-            margin-left: 4px;
-            padding: 13px 10px;
-
-            font-size: 14px;
-          }
+          font-size: 14px;
         }
       }
 
-      .Bottom {
+      .HostTextBox {
+        margin-left: 10px;
+        margin-right: auto;
+
         display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
+        align-items: flex-end;
 
-        margin-top: auto;
+        color: #333333;
+        font-size: 10px;
 
-        .Buttons {
-          display: flex;
-          gap: 6px;
-
-          button {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-
-            height: 28px;
-            background-color: #f5f5f5;
-            border: 1px #ededed;
-            border-radius: 10px;
-
-            color: #333333;
-            font-size: 12px;
-          }
-        }
-
-        .Inputdiv {
-          width: 285px;
-          height: 45px;
-
-          border: 1px #ededed;
+        .Text {
           border-radius: 15px;
+          background-color: #5043e7;
+          color: white;
 
+          width: auto;
+          height: auto;
+
+          margin-left: 4px;
+          padding: 13px 10px;
+
+          font-size: 14px;
+        }
+      }
+    }
+
+    .Bottom {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+
+      margin-top: auto;
+
+      .Buttons {
+        display: flex;
+        gap: 6px;
+
+        button {
           display: flex;
           justify-content: center;
           align-items: center;
 
-          margin-top: 8px;
+          height: 28px;
+          background-color: #f5f5f5;
+          border: 1px #ededed;
+          border-radius: 10px;
 
+          color: #333333;
+          font-size: 12px;
+        }
+      }
+
+      .Inputdiv {
+        width: 285px;
+        height: 45px;
+
+        border: 1px #ededed;
+        border-radius: 15px;
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        margin-top: 8px;
+
+        background-color: #f5f5f5;
+
+        input {
+          border-left: 1px solid#EDEDED;
+          width: 212.5px;
+          height: 40px;
+
+          border: none;
           background-color: #f5f5f5;
 
-          input {
-            border-left: 1px solid#EDEDED;
-            width: 212.5px;
-            height: 40px;
+          font-size: 12px;
+        }
 
-            border: none;
-            background-color: #f5f5f5;
+        .Emoji {
+          width: 20px;
+          height: auto;
 
-            font-size: 12px;
-          }
+          margin-left: 10px;
+          margin-right: 10px;
+        }
 
-          .Emoji {
-            width: 20px;
-            height: auto;
-
-            margin-left: 10px;
-            margin-right: 10px;
-          }
-
-          .Send {
-            width: 20px;
-            height: auto;
-            margin-right: 10px;
-          }
+        .Send {
+          width: 20px;
+          height: auto;
+          margin-right: 10px;
         }
       }
     }

@@ -65,6 +65,14 @@ function Header({ setLogoutmodal, isHost, code, state, roomId }) {
           {code}
           <img alt="copy" src={copy} />
         </div>
+        {/* 회의방에서 홈으로 나가기 (방은 그대로 남고 홈 목록에서 다시 들어올 수 있다) */}
+        <button type="button" className={style.Exit} onClick={() => navigate("/home")} title="회의방에서 나가 홈으로 이동">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+            <path d="M14 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M10 16l-4-4 4-4M6 12h9" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          나가기
+        </button>
         <img alt="profileicon" src={avatarSrc(profile?.avatar_url)} onClick={() => setProfileOpen(true)} />
 
         {/*--> 모달 <--*/}
