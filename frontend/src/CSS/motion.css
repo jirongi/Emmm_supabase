@@ -1,0 +1,272 @@
+/* 애니메이션은 backwards로만 채운다: forwards/both면 끝난 뒤에도 transform을 붙잡아 호버 효과가 안 먹는다 */
+/*
+ * 전체 화면 공통 움직임 (토스 느낌: 살짝 커졌다 튕기며 돌아오고, 누르면 쏙 들어감).
+ * 각 화면 CSS 모듈의 클래스 이름은 "파일명_클래스__해시" 형태라 접두어로 고른다.
+ */
+:root {
+  --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --smooth: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ---------- 눌리는 것: 호버하면 또잉, 누르면 쏙 ---------- */
+button,
+label[for],
+[class^="Home_new__"],
+[class^="Progress_room__"],
+[class^="Progress_archive__"],
+[class^="Archive_room__"],
+[class^="Archive_backIcon__"],
+[class^="Header_Number__"],
+[class^="Header_StateIng__"],
+[class^="Header_StateFinish__"],
+[class^="Header_Right__"] > img,
+[class^="Home_profileImg__"],
+[class^="Left_Head__"] img,
+[class^="Left_Add__"],
+[class^="DM_DMdiv__"],
+[class^="DM_Inputdiv__"] img,
+[class^="File_box__"],
+[class^="File_Createbox__"],
+[class^="File_ListIcon__"],
+[class^="AI_Left__"] img,
+[class^="Vote_Subtitle__"] img,
+[class^="Landing_"] button {
+  transition:
+    transform 0.45s var(--spring),
+    box-shadow 0.3s ease,
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    opacity 0.2s ease;
+}
+
+button:not(:disabled):hover,
+label[for]:hover,
+[class^="Home_new__"]:hover,
+[class^="Progress_room__"]:hover,
+[class^="Progress_archive__"]:hover,
+[class^="Archive_room__"]:hover,
+[class^="Archive_backIcon__"]:hover,
+[class^="Header_Number__"]:hover,
+[class^="Header_StateIng__"]:hover,
+[class^="Header_StateFinish__"]:hover,
+[class^="Header_Right__"] > img:hover,
+[class^="Home_profileImg__"]:hover,
+[class^="Left_Add__"]:hover,
+[class^="DM_DMdiv__"]:hover,
+[class^="DM_Inputdiv__"] img:hover,
+[class^="File_box__"]:hover,
+[class^="File_Createbox__"]:hover,
+[class^="File_ListIcon__"]:hover,
+[class^="AI_Left__"] img:hover,
+[class^="Vote_Subtitle__"] img:hover {
+  transform: scale(1.06);
+}
+
+button:not(:disabled):active,
+label[for]:active,
+[class^="Home_new__"]:active,
+[class^="Progress_room__"]:active,
+[class^="Progress_archive__"]:active,
+[class^="Archive_room__"]:active,
+[class^="Header_Number__"]:active,
+[class^="Header_StateIng__"]:active,
+[class^="Header_StateFinish__"]:active,
+[class^="Header_Right__"] > img:active,
+[class^="Home_profileImg__"]:active,
+[class^="Left_Add__"]:active,
+[class^="DM_DMdiv__"]:active,
+[class^="File_box__"]:active,
+[class^="File_Createbox__"]:active,
+[class^="AI_Left__"] img:active,
+[class^="Vote_Subtitle__"] img:active {
+  transform: scale(0.94);
+  transition-duration: 0.12s;
+}
+
+/* 큰 카드: 크게 키우면 옆 카드와 겹치므로 살짝 떠오르게 */
+[class^="Right_Block__"],
+[class^="Right_BigBlock__"],
+[class^="File_Nofilediv__"],
+[class^="AI_NoAIdiv__"],
+[class^="Vote_Novotediv__"] {
+  transition: transform 0.5s var(--spring), box-shadow 0.35s ease;
+}
+
+[class^="Right_Block__"]:hover,
+[class^="Right_BigBlock__"]:hover {
+  transform: translateY(-6px) scale(1.015);
+  box-shadow: 0 18px 40px rgba(80, 67, 231, 0.12);
+}
+
+[class^="File_Nofilediv__"]:hover,
+[class^="AI_NoAIdiv__"]:hover,
+[class^="Vote_Novotediv__"]:hover {
+  transform: scale(1.05);
+}
+
+[class^="Right_Block__"]:active,
+[class^="Right_BigBlock__"]:active,
+[class^="File_Nofilediv__"]:active,
+[class^="AI_NoAIdiv__"]:active,
+[class^="Vote_Novotediv__"]:active {
+  transform: scale(0.97);
+  transition-duration: 0.12s;
+}
+
+/* 목록 줄(투표, 투표 옵션): 옆으로 살짝 */
+[class^="Vote_Vote__"],
+[class^="Vote_detail_modal_Vote__"],
+[class^="Vote_detail_modal_ChosenVote__"] {
+  transition: transform 0.4s var(--spring), border-color 0.2s ease, background-color 0.2s ease;
+}
+
+[class^="Vote_Vote__"]:hover,
+[class^="Vote_detail_modal_Vote__"]:hover,
+[class^="Vote_detail_modal_ChosenVote__"]:hover {
+  transform: scale(1.015);
+}
+
+[class^="Vote_Vote__"]:active,
+[class^="Vote_detail_modal_Vote__"]:active,
+[class^="Vote_detail_modal_ChosenVote__"]:active {
+  transform: scale(0.985);
+  transition-duration: 0.12s;
+}
+
+/* 닫기(+를 45도 돌린 것): 호버하면 한 바퀴 더 */
+[class*="Maintitle"] h2,
+[class^="DM_Top__"] p,
+[class^="Left_SettingDiv__"] h2,
+[class^="CreateRoom_Right__"] > h2 {
+  transition: transform 0.45s var(--spring), color 0.2s ease;
+}
+
+[class*="Maintitle"] h2:hover,
+[class^="DM_Top__"] p:hover,
+[class^="Left_SettingDiv__"] h2:hover,
+[class^="CreateRoom_Right__"] > h2:hover {
+  transform: rotate(135deg) scale(1.15);
+}
+
+/* 설정 톱니바퀴 */
+[class^="Left_Head__"] img {
+  transition: transform 0.6s var(--spring);
+}
+
+[class^="Left_Head__"] img:hover {
+  transform: rotate(90deg) scale(1.1);
+}
+
+/* ---------- 안건: 추가되면 옆에서 샥 들어와 또잉 ---------- */
+[class^="Left_Block__"],
+[class^="Left_ChosenBlock__"] {
+  animation: agendaIn 0.6s var(--spring) backwards;
+  transition: transform 0.4s var(--spring), background-color 0.25s ease, border-color 0.25s ease;
+}
+
+[class^="Left_Block__"]:hover {
+  transform: translateX(4px);
+  background-color: #f7f8ff;
+}
+
+[class^="Left_Block__"]:active,
+[class^="Left_ChosenBlock__"]:active {
+  transform: scale(0.97);
+  transition-duration: 0.12s;
+}
+
+@keyframes agendaIn {
+  0% {
+    opacity: 0;
+    transform: translateX(-60px) scale(0.9);
+  }
+
+  60% {
+    opacity: 1;
+  }
+}
+
+/* ---------- 패널 전환: 아래에서 부드럽게 ---------- */
+[class^="Right_Maindiv__"],
+[class^="File_Maindiv__"],
+[class^="Comment_Maindiv__"],
+[class^="Vote_Maindiv__"],
+[class^="AI_Maindiv__"],
+[class^="Left_Setting__"],
+[class^="Left_Agenda__"] {
+  animation: panelIn 0.5s var(--smooth) backwards;
+}
+
+@keyframes panelIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+/* ---------- 모달: 배경은 스르륵, 창은 톡 튀어나오게 ---------- */
+[class^="CreateRoom_ModalNew__"],
+[class^="LogoutModal_DeleteModal__"],
+[class^="Deletemodal_DeleteModal__"],
+[class^="Joinpw_extradiv__"] {
+  animation: fadeIn 0.25s ease backwards;
+}
+
+[class^="CreateRoom_Modal__"],
+[class^="LogoutModal_Modal__"],
+[class^="Deletemodal_Modal__"],
+[class^="Joinpw_modal__"],
+[class^="Vote_detail_modal_NewVote__"],
+[class^="Vote_new_modal_NewVote__"] {
+  animation: popIn 0.5s var(--spring) backwards;
+}
+
+/* 작은 팝업: 버튼 쪽에서 펼쳐지듯 */
+[class^="Profile_profilePopup__"],
+[class^="Header_ProfileModal__"],
+[class^="DM_ModalChat__"],
+[class^="File_Filelist__"],
+[class^="Left_Modal__"],
+[class^="Vote_Modal__"] {
+  animation: dropIn 0.4s var(--spring) backwards;
+}
+
+[class^="DM_ModalChat__"] {
+  transform-origin: bottom right;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: scale(0.88) translateY(12px);
+  }
+}
+
+@keyframes dropIn {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+}
+
+/* 움직임 줄이기 설정을 켠 사용자에게는 효과를 끈다 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* 커스텀 커서(CustomCursor.js)를 쓰는 동안 기본 커서는 숨긴다 */
+html.custom-cursor,
+html.custom-cursor * {
+  cursor: none !important;
+}

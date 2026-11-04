@@ -10,6 +10,7 @@ import DM from "../asset/icon-DM.png";
 import { getDms, sendDm } from "../api/dm";
 import { errorMessage } from "../api/errors";
 import { timeAgo, useNow } from "../hooks/useNow";
+import { notify } from "./Toast";
 
 function Dm({ roomId, isHost }) {
     const queryClient = useQueryClient();
@@ -46,6 +47,32 @@ function Dm({ roomId, isHost }) {
         }
     }, [messages, modalChat])
 
+    // [host] 안 읽은 DM: 마지막으로 창을 열어 본 시각 이후에 온 메시지 (이 브라우저에만 저장)
+    const seenKey = `dm-seen:${roomId}`;
+    const [lastSeen, setLastSeen] = useState(() => {
+        try { return Number(localStorage.getItem(seenKey)) || 0; } catch { return 0; }
+    });
+    const unread = isHost ? messages.filter((m) => new Date(m.created_at).getTime() > lastSeen).length : 0;
+
+    useEffect(() => {
+        if (!isHost || !modalChat || messages.length === 0) return;
+        const latest = new Date(messages[messages.length - 1].created_at).getTime();
+        if (latest <= lastSeen) return;
+        setLastSeen(latest);
+        try { localStorage.setItem(seenKey, String(latest)); } catch { /* 저장 못 해도 화면은 동작 */ }
+    }, [isHost, modalChat, messages, lastSeen, seenKey]);
+
+    // [host] 창이 닫혀 있을 때 새 DM이 오면 알림
+    const knownIds = useRef(null);
+    useEffect(() => {
+        const ids = new Set(messages.map((m) => m.id));
+        if (knownIds.current && isHost && !modalChat) {
+            const fresh = messages.filter((m) => !knownIds.current.has(m.id));
+            fresh.forEach((m) => notify(`새 DM · ${m.content}`, { icon: "💬", onClick: () => setModalChat(true) }));
+        }
+        knownIds.current = ids;
+    }, [messages, isHost, modalChat]);
+
     async function sendMessage(content) {
         const text = content.trim();
         if (!text) return;
@@ -75,6 +102,7 @@ function Dm({ roomId, isHost }) {
             }
             <div className={style.DMdiv}>
                 <img alt="DM" src={DM} />
+                {unread > 0 && !modalChat && <span key={unread} className={style.Badge}>{unread > 99 ? "99+" : unread}</span>}
                 {modalChat && <div className={style.ModalChat}>
                     <div className={style.Top}>
                         <h3>{isHost ? "받은 메세지" : "To.호스트"}</h3>

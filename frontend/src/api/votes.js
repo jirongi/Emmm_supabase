@@ -55,6 +55,14 @@ export async function getMySelection(voteId, userId) {
   return rows[0]?.option_id ?? null;
 }
 
+// 누가 어느 투표에 참여했는지 (방 멤버는 모두 볼 수 있음, RLS)
+export async function getSelections(voteIds) {
+  if (voteIds.length === 0) return [];
+  return unwrap(
+    await supabase.from("vote_selections").select("vote_id, user_id").in("vote_id", voteIds),
+  );
+}
+
 export async function castVote(voteId, optionId) {
   unwrap(await supabase.rpc("cast_vote", { p_vote_id: voteId, p_option_id: optionId }));
 }

@@ -102,10 +102,13 @@ export function useAgendaRealtime(agendaId) {
     listen(channel, "files", byAgenda, refresh(["files", agendaId], usage));
     listen(channel, "votes", byAgenda, refresh(["votes", agendaId], ["vote"], usage));
     listen(channel, "ai_summaries", byAgenda, refresh(["summary", agendaId], usage));
+    // 투표 참여 현황: vote_selections에는 agenda_id가 없어 필터 없이 받는다 (RLS로 내 방 것만 옴)
+    listen(channel, "vote_selections", undefined, refresh(["voters", agendaId]));
     channel.subscribe((status) => {
       if (status === "SUBSCRIBED") {
         refresh(
           ["comments", agendaId], ["files", agendaId], ["votes", agendaId], ["summary", agendaId], usage,
+          ["voters", agendaId],
         )();
       }
     });
@@ -126,6 +129,7 @@ export function useVoteRealtime(voteId) {
       ["options", "results", "mySelection"].forEach((key) =>
         queryClient.invalidateQueries({ queryKey: [key, voteId] }),
       );
+      queryClient.invalidateQueries({ queryKey: ["voters"] });
     };
     const byVote = `vote_id=eq.${voteId}`;
 

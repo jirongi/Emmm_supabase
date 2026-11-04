@@ -8,8 +8,34 @@ import {
 } from "../api/votes";
 import { errorMessage } from "../api/errors";
 import { useVoteRealtime } from "../hooks/useRealtime";
+import { avatarSrc } from "../lib/avatar";
 
-function VoteDetail({ isHost, userId, voteId, DetailName, onClose }) {
+// [host] 누가 투표했고 누가 아직인지
+function Participation({ progress }) {
+    if (!progress) return null;
+    const { voted, notVoted, total } = progress;
+    const person = (member, done) => (
+        <div key={member.user_id} className={done ? style.PersonDone : style.PersonWait} title={done ? "투표함" : "아직 안 함"}>
+            <img alt="" src={avatarSrc(member.profiles?.avatar_url)} />
+            {member.profiles?.name}
+        </div>
+    );
+    return (
+        <div className={style.Participation}>
+            <div className={style.ParticipationHead}>
+                <b>투표 현황</b>
+                <span>{voted.length}/{total}명 참여</span>
+            </div>
+            <div className={style.Bar}><div style={{ width: `${total ? (voted.length / total) * 100 : 0}%` }} /></div>
+            <div className={style.People}>
+                {voted.map((m) => person(m, true))}
+                {notVoted.map((m) => person(m, false))}
+            </div>
+        </div>
+    );
+}
+
+function VoteDetail({ isHost, userId, voteId, DetailName, onClose, progress }) {
     const queryClient = useQueryClient();
     useVoteRealtime(voteId);
 
@@ -104,6 +130,8 @@ function VoteDetail({ isHost, userId, voteId, DetailName, onClose }) {
                     <div className={style.Subtitle}>
                         <h3>{DetailName}</h3>
                     </div>
+
+                    {isHost && <Participation progress={progress} />}
 
                     <div className={style.Votelist}>
                         {options.map((option) => (

@@ -76,6 +76,8 @@ function RightList({ isHost, roomId, userId, agenda, onlineIds }) {
     File: <File isHost={isHost} roomId={roomId} userId={userId} agendaId={agendaId} onChange={setMode} />,
     Comment: <Comment agendaId={agendaId} onChange={setMode} />,
     Vote: <Vote
+      roomId={roomId}
+      onlineIds={onlineIds}
       clickedAgendaName={agenda?.name} //투표리스트 title=안건이름
       isHost={isHost}
       userId={userId}

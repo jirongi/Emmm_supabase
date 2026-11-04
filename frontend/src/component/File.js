@@ -73,9 +73,9 @@ function File({ isHost, roomId, userId, agendaId, onChange }) {
         }
     }
 
-    const fileInput = (id) => (
-        <input style={{ display: "none" }} id={id} type="file" accept={ALLOWED_TYPES.join(",")} onChange={addNewfile} />
-    );
+    // 파일 입력은 항상 화면에 둔다. 목록 팝업 안에 두면 Mac에서 파일 창이 열릴 때 mouseleave로 팝업이 닫히면서
+    // input이 사라져 고른 파일이 전달되지 않았다 (첫 업로드 화면에서만 올라가던 원인).
+    const fileInput = <input style={{ display: "none" }} id="Newfile" type="file" accept={ALLOWED_TYPES.join(",")} onChange={addNewfile} />;
 
     return (
         <div className={style.Maindiv}>
@@ -83,10 +83,10 @@ function File({ isHost, roomId, userId, agendaId, onChange }) {
                 <h3>파일</h3>
                 <h2 onClick={() => onChange("basic")} >+</h2>
             </div>
+            {fileInput}
             {files.length === 0 ? <>
-                {fileInput("Newfile-empty")}
                 <div className={style.Nofile}>
-                    <label htmlFor="Newfile-empty">
+                    <label htmlFor="Newfile">
                         <div className={style.Nofilediv} onMouseEnter={() => setIconFile(true)} onMouseLeave={() => setIconFile(false)}>
                             <img alt="Fileicon" src={iconFile ? fileCenterHoverafter : fileCenterHoverbefore} />
                             <h3>{uploading ? "업로드 중..." : "여기 눌러서 파일 업로드하세요"}</h3>
@@ -100,8 +100,7 @@ function File({ isHost, roomId, userId, agendaId, onChange }) {
                         : <img alt={chosen.file_name} src={chosenUrl} />)}
                 </div></>}
             {listModal && <div className={style.Filelist} onMouseLeave={() => setListModal(false)}>
-                {fileInput("Newfile-list")}
-                <label htmlFor="Newfile-list">
+                <label htmlFor="Newfile">
                     <div className={style.Createbox}>{uploading ? "…" : "+"}</div>
                 </label>
                 {files.map((file) => (

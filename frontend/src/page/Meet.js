@@ -17,6 +17,7 @@ import { getMyRole, getRoom, setCurrentAgenda } from "../api/rooms";
 import { getAgendas } from "../api/agendas";
 import { errorMessage } from "../api/errors";
 import { useAgendaRealtime, useRoomRealtime } from "../hooks/useRealtime";
+import { useVoteDoneAlert, useVoteProgress } from "../hooks/useVoteProgress";
 
 function Meet() {
   const { roomId: roomParam } = useParams();
@@ -66,6 +67,9 @@ function Meet() {
   // 지금 보는 안건 = 방의 현재 안건. host가 바꾸면 모두의 화면이 따라 바뀐다.
   const clickedAgenda = agendas.find((agenda) => agenda.id === room?.current_agenda_id) ?? null;
   useAgendaRealtime(clickedAgenda?.id);
+  // host: 지금 안건의 투표에 접속자가 모두 참여하면 알림
+  const voteProgress = useVoteProgress(clickedAgenda?.id, roomId, onlineIds);
+  useVoteDoneAlert(voteProgress, user.id, isHost);
 
   async function selectAgenda(agendaId) {
     try {

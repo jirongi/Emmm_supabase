@@ -10,9 +10,11 @@ import iconHoverbefore from "../asset/icon-emptyAIHoverbefore.png";
 import iconHoverafter from "../asset/icon-emptyAIHoverafter.png";
 import loading from "../asset/icon-loading.jpg";
 import { generateSummary, getSummary } from "../api/ai";
+import { timeAgo, useNow } from "../hooks/useNow";
 
 function AI({ isHost, agendaId, onChange }) {
     const queryClient = useQueryClient();
+    const now = useNow(30000);
     const [generating, setGenerating] = useState(false);
     const [iconAI, setIconAI] = useState(false); //아이콘 호버
     const [buttonAI, setButtonAI] = useState(false); //버튼 호버
@@ -52,13 +54,22 @@ function AI({ isHost, agendaId, onChange }) {
             </div>
             {isSummaried ?
                 <div className={style.MarkdownBody}>
-                    {summary && !generating ? <>
-                        <h5>{summary.title}</h5>
-                        <ReactMarkdown>
-                            {summary.summary_text}
-                        </ReactMarkdown>
-                    </> :
-                        <img alt="loading" className={style.Loading} src={loading} />}
+                    {summary && !generating ? <article className={style.Report}>
+                        <header className={style.ReportHead}>
+                            <span className={style.Chip}>✨ AI 회의 요약</span>
+                            <h1>{summary.title}</h1>
+                            <p>{timeAgo(summary.updated_at, now)} 업데이트</p>
+                        </header>
+                        <div className={style.Markdown}>
+                            <ReactMarkdown>
+                                {summary.summary_text}
+                            </ReactMarkdown>
+                        </div>
+                    </article> :
+                        <div className={style.Generating}>
+                            <img alt="loading" className={style.Loading} src={loading} />
+                            <p>회의 내용을 정리하고 있어요…</p>
+                        </div>}
                 </div> :
                 <div className={style.NoAI}>
                     <div className={style.NoAIdiv} onClick={() => generate()} onMouseEnter={() => setIconAI(true)} onMouseLeave={() => setIconAI(false)}>

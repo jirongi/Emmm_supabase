@@ -3,17 +3,24 @@ import Meet from "./page/Meet";
 import Landing from "./page/Landing";
 import ProtectedRoute from "./auth/ProtectedRoute";
 import { Navigate, Route, Routes } from "react-router-dom";
+import { Toaster } from "./component/Toast";
+import CustomCursor from "./component/CustomCursor";
+import "./CSS/motion.css";
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Landing />} />
-      <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
-      {/* /meet = 새 회의 만들기, /meet/:roomId = 회의방 */}
-      <Route path="/meet" element={<ProtectedRoute><Meet /></ProtectedRoute>} />
-      <Route path="/meet/:roomId" element={<ProtectedRoute><Meet /></ProtectedRoute>} />
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+    <>
+      <Toaster />
+      <CustomCursor />
+      <Routes>
+        <Route path="/" element={<Landing />} />
+        <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+        {/* /meet = 새 회의 만들기, /meet/:roomId = 회의방 */}
+        <Route path="/meet" element={<ProtectedRoute><Meet /></ProtectedRoute>} />
+        <Route path="/meet/:roomId" element={<ProtectedRoute><Meet /></ProtectedRoute>} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </>
   );
 }
 

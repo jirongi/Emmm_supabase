@@ -14,8 +14,9 @@ import voteCenterHoverbefore from "../asset/icon-emptyVoteHoverbefore.png";
 import voteCenterHoverafter from "../asset/icon-emptyVoteHoverafter.png";
 import { deleteVote, getVotes, updateVote } from "../api/votes";
 import { errorMessage } from "../api/errors";
+import { useVoteProgress } from "../hooks/useVoteProgress";
 
-function Vote({ isHost, userId, onChange, agendaId, clickedAgendaName }) {
+function Vote({ isHost, userId, onChange, agendaId, clickedAgendaName, roomId, onlineIds }) {
     const queryClient = useQueryClient();
 
     //[아이콘 호버]
@@ -56,6 +57,7 @@ function Vote({ isHost, userId, onChange, agendaId, clickedAgendaName }) {
         queryFn: () => getVotes(agendaId),
     });
     const refresh = () => queryClient.invalidateQueries({ queryKey: ["votes", agendaId] });
+    const progress = useVoteProgress(agendaId, roomId, onlineIds);
 
     function handleOption(e, id) {
         setModalId(id);
@@ -118,7 +120,7 @@ function Vote({ isHost, userId, onChange, agendaId, clickedAgendaName }) {
                                         {Changed === vote.id
                                             ? <input ref={inputRef} onClick={(e) => e.stopPropagation()} onKeyDown={(e) => EditVote(e, vote.id)} placeholder={vote.title} />
                                             : <h1>{vote.title}</h1>}
-                                        <span>{vote.status === "complete" ? "마감" : ""}</span>
+                                        <span>{vote.status === "complete" ? "마감" : progress[vote.id] ? `${progress[vote.id].voted.length}/${progress[vote.id].total}명 참여` : ""}</span>
                                     </div>
                                     {isHost && <h3
                                         className={style.option}
@@ -165,6 +167,7 @@ function Vote({ isHost, userId, onChange, agendaId, clickedAgendaName }) {
                     userId={userId}
                     voteId={detail.id}
                     DetailName={detail.title}
+                    progress={progress[detail.id]}
                     onClose={() => setDetail(null)}
                 />
             }
