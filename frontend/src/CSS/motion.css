@@ -235,6 +235,12 @@ label[for]:active,
   transform-origin: bottom right;
 }
 
+/* 안건 ⋮ 메뉴는 바로 떠야 하므로 짧게 */
+[class^="Left_Modal__"] {
+  animation-duration: 0.18s;
+  transform-origin: top right;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;

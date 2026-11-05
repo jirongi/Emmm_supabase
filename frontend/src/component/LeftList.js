@@ -212,6 +212,7 @@ function LeftList({ isHost, roomId, roomName, agendas, clickedAgendaId, onSelect
                 className={[
                   clickedAgendaId === agenda.id ? style.ChosenBlock : style.Block,
                   editing && style.Editing,
+                  ModalId === agenda.id && style.MenuOpen,
                   savedId === agenda.id && style.Saved,
                 ].filter(Boolean).join(" ")}
                 onClick={() => isHost && !editing && onSelectAgenda(agenda.id)}

@@ -73,8 +73,9 @@
 .rooms {
   display: grid;
   height: 335px;
-  margin-left: 138px;
-  margin-right: 138px;
+  /* 호버하면 타일이 커지는데, 스크롤 상자가 위·왼쪽을 잘라 내지 않게 안쪽 여백을 두고 그만큼 바깥 여백을 줄인다 */
+  padding: 14px;
+  margin: -14px 124px 0;
   grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
   row-gap: 21px;
   column-gap: 20px;
