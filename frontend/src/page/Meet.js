@@ -64,14 +64,25 @@ function Meet() {
 
   const room = roomQuery.data;
   const isHost = role === "host";
-  // 지금 보는 안건 = 방의 현재 안건. host가 바꾸면 모두의 화면이 따라 바뀐다.
-  const clickedAgenda = agendas.find((agenda) => agenda.id === room?.current_agenda_id) ?? null;
+  // 회의가 끝난(완료) 방에서는 참여자도 안건을 골라 다시 볼 수 있다. 고른 안건은 내 화면에만 적용된다.
+  const browsing = !isHost && room?.state === "complete";
+  const [browseId, setBrowseId] = useState(null);
+  useEffect(() => {
+    if (!browsing) setBrowseId(null);
+  }, [browsing]);
+  // 지금 보는 안건 = 방의 현재 안건. host가 바꾸면 모두의 화면이 따라 바뀐다. (완료된 방의 참여자는 직접 고른 안건)
+  const viewId = (browsing && agendas.some((a) => a.id === browseId)) ? browseId : room?.current_agenda_id;
+  const clickedAgenda = agendas.find((agenda) => agenda.id === viewId) ?? null;
   useAgendaRealtime(clickedAgenda?.id);
   // host: 지금 안건의 투표에 접속자가 모두 참여하면 알림
   const voteProgress = useVoteProgress(clickedAgenda?.id, roomId, onlineIds);
   useVoteDoneAlert(voteProgress, user.id, isHost);
 
   async function selectAgenda(agendaId) {
+    if (browsing) {
+      setBrowseId(agendaId);
+      return;
+    }
     try {
       await setCurrentAgenda(roomId, agendaId);
       queryClient.invalidateQueries({ queryKey: ["room", roomId] });
@@ -107,6 +118,7 @@ function Meet() {
           <Left
             deleteModal={setDeleteModal}
             onSelectAgenda={selectAgenda}
+            canSelect={isHost || browsing}
             agendas={agendas}
             isHost={isHost}
             roomId={roomId}

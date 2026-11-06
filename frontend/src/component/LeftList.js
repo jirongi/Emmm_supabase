@@ -14,7 +14,7 @@ import { renameRoom, setCurrentAgenda, setRoomPassword } from "../api/rooms";
 import { addAgenda, deleteAgenda, updateAgenda } from "../api/agendas";
 import { errorMessage } from "../api/errors";
 
-function LeftList({ isHost, roomId, roomName, agendas, clickedAgendaId, onSelectAgenda, deleteModal }) {
+function LeftList({ isHost, canSelect, roomId, roomName, agendas, clickedAgendaId, onSelectAgenda, deleteModal }) {
   const queryClient = useQueryClient();
 
   //[안건이름변경] 고치는 중인 안건 id와 입력값
@@ -215,7 +215,7 @@ function LeftList({ isHost, roomId, roomName, agendas, clickedAgendaId, onSelect
                   ModalId === agenda.id && style.MenuOpen,
                   savedId === agenda.id && style.Saved,
                 ].filter(Boolean).join(" ")}
-                onClick={() => isHost && !editing && onSelectAgenda(agenda.id)}
+                onClick={() => canSelect && !editing && onSelectAgenda(agenda.id)}
               >
                 <div className={style.Text} onDoubleClick={() => isHost && !editing && startEdit(agenda)}>
                   <span>•</span>

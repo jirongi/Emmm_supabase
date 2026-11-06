@@ -23,7 +23,7 @@ function Dm({ roomId, isHost }) {
     const ModalRef = useRef(null);
     const ChatRef = useRef(null);
 
-    const { data: messages = [] } = useQuery({
+    const { data: messages = [], isSuccess: messagesLoaded } = useQuery({
         queryKey: ["dms", roomId],
         queryFn: () => getDms(roomId),
     });
@@ -63,15 +63,19 @@ function Dm({ roomId, isHost }) {
     }, [isHost, modalChat, messages, lastSeen, seenKey]);
 
     // [host] 창이 닫혀 있을 때 새 DM이 오면 알림
+    // 기준점은 목록을 실제로 받은 뒤에 잡는다. 받기 전의 빈 목록을 기준으로 삼으면
+    // 그 뒤 도착한 기존 메시지가 전부 "새 DM"으로 보여, 읽은 DM까지 알림이 떴다.
     const knownIds = useRef(null);
     useEffect(() => {
+        if (!messagesLoaded) return;
         const ids = new Set(messages.map((m) => m.id));
         if (knownIds.current && isHost && !modalChat) {
-            const fresh = messages.filter((m) => !knownIds.current.has(m.id));
+            const fresh = messages.filter((m) =>
+                !knownIds.current.has(m.id) && new Date(m.created_at).getTime() > lastSeen);
             fresh.forEach((m) => notify(`새 DM · ${m.content}`, { icon: "💬", onClick: () => setModalChat(true) }));
         }
         knownIds.current = ids;
-    }, [messages, isHost, modalChat]);
+    }, [messages, messagesLoaded, isHost, modalChat, lastSeen]);
 
     async function sendMessage(content) {
         const text = content.trim();
