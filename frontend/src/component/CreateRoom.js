@@ -6,7 +6,8 @@ import style from "../CSS/CreateRoom.module.css";
 import visible from "../asset/icon-visible.png";
 import tip from "../asset/icon-tip.png";
 import CreateNewimg from "../asset/icon-createNew.png";
-import { createRoom } from "../api/rooms";
+import { createRoom, setCurrentAgenda } from "../api/rooms";
+import { addAgenda } from "../api/agendas";
 import { errorMessage } from "../api/errors";
 
 function CreateRoom({ onCreated }) {
@@ -24,6 +25,13 @@ function CreateRoom({ onCreated }) {
         setSubmitting(true);
         try {
             const room = await createRoom(name.trim(), password);
+            // 첫 안건 하나를 미리 만들어 바로 회의를 시작할 수 있게 (실패해도 방은 그대로 연다)
+            try {
+                const agenda = await addAgenda(room.id, "안건 제목");
+                await setCurrentAgenda(room.id, agenda.id);
+            } catch {
+                /* 안건은 방 안에서 직접 추가할 수 있다 */
+            }
             onCreated(room);
         } catch (error) {
             alert(errorMessage(error));

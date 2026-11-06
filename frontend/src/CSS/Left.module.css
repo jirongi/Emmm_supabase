@@ -130,6 +130,9 @@ hr {
       font-size: 24px;
       color: #b4b3b3;
       margin-left: 270px;
+      /* 상자를 글자 크기에 맞춰야 제자리에서 돈다 */
+      width: fit-content;
+      line-height: 1;
       transform: rotate(45deg);
     }
 

@@ -66,6 +66,9 @@
 
     width: 305px;
     height: 400px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
     border: 1px solid#E4E4E4;
     border-radius: 15px;
     background-color: #ffffff;
@@ -105,7 +108,10 @@
       margin-top: 20px;
       margin-bottom: 8px;
       width: 305px;
-      height: 57%;
+      /* 남는 높이를 모두 쓴다: 참여자는 아래 입력칸 위까지, 호스트는 창 끝까지 */
+      flex: 1;
+      min-height: 0;
+      padding-bottom: 6px;
       display: flex;
       flex-direction: column;
       gap: 8px;
@@ -167,6 +173,7 @@
       align-items: center;
 
       margin-top: auto;
+      margin-bottom: 10px;
 
       .Buttons {
         display: flex;

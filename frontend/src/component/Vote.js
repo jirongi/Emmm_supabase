@@ -115,7 +115,7 @@ function Vote({ isHost, userId, onChange, agendaId, clickedAgendaName, roomId, o
                         </div>
                         <div className={style.Votelist}>
                             {votes.map((vote) => (
-                                <div className={style.Vote} key={vote.id} onClick={() => setDetail({ id: vote.id, title: vote.title })}>
+                                <div className={ModalId === vote.id ? `${style.Vote} ${style.MenuOpen}` : style.Vote} key={vote.id} onClick={() => setDetail({ id: vote.id, title: vote.title })}>
                                     <div className={style.VoteText} onDoubleClick={() => isHost && setChanged(vote.id)}>
                                         {Changed === vote.id
                                             ? <input ref={inputRef} onClick={(e) => e.stopPropagation()} onKeyDown={(e) => EditVote(e, vote.id)} placeholder={vote.title} />

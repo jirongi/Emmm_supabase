@@ -279,3 +279,15 @@ label[for]:active,
 [class^="Left_ChosenBlock__"]:has([class^="Left_Modal__"]):active {
   transform: none;
 }
+
+/* 투표 ⋮ 메뉴가 열린 줄도 누르는 동안 움직이지 않게 (메뉴가 밀려 클릭이 빗나감) */
+[class^="Vote_Vote__"]:has([class^="Vote_Modal__"]):hover,
+[class^="Vote_Vote__"]:has([class^="Vote_Modal__"]):active {
+  transform: none;
+}
+
+[class^="Vote_Modal__"] {
+  animation: dropIn 0.18s var(--spring) backwards;
+  transform-origin: top right;
+}
+

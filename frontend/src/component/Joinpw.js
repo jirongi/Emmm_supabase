@@ -1,5 +1,5 @@
 //홈페이지 프로필 사진 눌렀을 때 나오는 창
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import styles from "../CSS/Joinpw.module.css";
 
@@ -19,6 +19,11 @@ function Joinpw({ onChange, room }) {
   const [password, setPassword] = useState("");
 
   const [wrongPw, setWrongPw] = useState("pwNomal");
+
+  // 창이 뜨면 바로 첫 칸에 입력할 수 있게
+  useEffect(() => {
+    inputRef1.current?.focus();
+  }, []);
 
   function onDelete(e) {
     if (e.target.value.length === 1) {
@@ -134,6 +139,11 @@ function Joinpw({ onChange, room }) {
       navigate(`/meet/${room.room_id}`);
     } catch {
       setWrongPw("pwWrong");
+      // 틀리면 네 칸을 비우고 첫 칸부터 다시
+      [inputRef1, inputRef2, inputRef3, inputRef4].forEach((r) => { if (r.current) r.current.value = ""; });
+      inputNum.length = 0;
+      setPassword("");
+      inputRef1.current?.focus();
       setTimeout(function () {
         setWrongPw("pwNomal");
       }, 500);

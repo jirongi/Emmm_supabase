@@ -77,6 +77,12 @@
     font-size: 90px;
   }
 
+  /* 지금 입력할 칸 */
+  .pwNomal:focus {
+    border-color: #5043e7;
+    box-shadow: 0 0 0 4px rgba(80, 67, 231, 0.12);
+  }
+
   .pwWrong {
     padding: 0px;
     width: 97px;

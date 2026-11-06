@@ -49,6 +49,9 @@
                 color: #B4B3B3;
                 margin-left: 320px;
                 margin-top: 40px;
+                /* 상자를 글자 크기에 맞춰야 제자리에서 돈다 */
+                width: fit-content;
+                line-height: 1;
                 transform: rotate(45deg);
             }
 
